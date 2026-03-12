@@ -1,0 +1,285 @@
+/* ========== NAVBAR ========== */
+
+.navbar {
+  position: fixed;
+  height: 68px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #000000;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+
+.navbar-container {
+  width: min(1400px, calc(100% - 24px));
+  margin: 0 auto;
+  padding-left: 2px;
+  padding-right: 2px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* ========== BRAND ========== */
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.navbar-logo {
+  height: 56px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 10px rgba(255, 45, 45, 0.2));
+}
+
+.navbar-brand-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+
+.navbar-title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #f9fbff;
+  background: linear-gradient(90deg, #ffffff 0%, #ffd8de 38%, #ff7b8f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* ========== LINKS ========== */
+
+.navbar-links {
+  display: flex;
+  gap: 28px;
+  margin-left: auto;
+  margin-right: 32px;
+}
+
+.navbar-collapse {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.nav-link {
+  position: relative;
+  color: #f1f4fb;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+
+/* SPEED LINE UNDERLINE */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: #ffffff;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+  color: white;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ========== ACTIONS ========== */
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.navbar-toggle {
+  display: none;
+  margin-left: auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.navbar-toggle span {
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* ========== BUTTON BASE ========== */
+
+.btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+/* HOVER LIFT */
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ========== MINI STORE ========== */
+
+.store {
+  background: white;
+  color: #dc0000;
+}
+
+.store:hover {
+  background: #f2f2f2;
+  box-shadow: 0 6px 18px rgba(255, 255, 255, 0.15);
+}
+
+/* ========== MY ACCOUNT (UPDATED - NO EMOJI) ========== */
+
+.account {
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 1px solid #444;
+  position: relative;
+  overflow: hidden;
+}
+
+.account:hover {
+  background: #333333;
+  border-color: #dc0000;
+  box-shadow: 0 6px 18px rgba(220, 0, 0, 0.25);
+}
+
+/* ========== ADMIN ========== */
+
+.admin {
+  background: #000;
+  border: 1px solid #333;
+  color: white;
+}
+
+.admin:hover {
+  background: #111;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+/* ========== LOGIN / LOGOUT (PRIMARY CTA) ========== */
+
+.btn-primary {
+  background: #dc0000;
+  color: white;
+  /* SUBTLE PULSE */
+  animation: pulseGlow 2.5s infinite;
+}
+
+.btn-primary:hover {
+  background: #b00000;
+  animation: none;
+  box-shadow: 0 0 20px rgba(220, 0, 0, 0.6);
+}
+
+/* ========== PULSE ANIMATION ========== */
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0px rgba(220, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(220, 0, 0, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0px rgba(220, 0, 0, 0.4);
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  .navbar-container {
+    width: calc(100% - 16px);
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .navbar-toggle {
+    display: inline-flex;
+  }
+
+  .navbar-collapse {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 68px;
+    margin-left: 0;
+    display: none;
+    z-index: 1200;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.95);
+    padding: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .navbar-collapse.open {
+    display: flex;
+  }
+
+  .navbar-links {
+    margin: 0;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .navbar-actions {
+    gap: 8px;
+    flex-direction: column;
+  }
+  
+  .navbar-title {
+    font-size: 24px;
+  }
+
+  .navbar-logo {
+    height: 46px;
+  }
+  
+  .btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    width: 100%;
+  }
+}

@@ -1,0 +1,73 @@
+:root {
+  --page-padding: clamp(16px, 3.5vw, 28px);
+  --card-padding: 1rem;
+  --text-scale: 1;
+}
+
+html[data-viewport="xs"] {
+  --page-padding: 14px;
+  --card-padding: 0.85rem;
+  --text-scale: 0.92;
+}
+
+html[data-viewport="sm"] {
+  --page-padding: 16px;
+  --card-padding: 0.95rem;
+  --text-scale: 0.96;
+}
+
+html[data-viewport="md"] {
+  --page-padding: 20px;
+  --card-padding: 1rem;
+  --text-scale: 1;
+}
+
+body {
+  line-height: 1.5;
+  font-size: calc(16px * var(--text-scale));
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+html[data-viewport="xs"] :where([class$="-main"], [class$="-page"], [class$="-layout"], main) {
+  padding-left: var(--page-padding);
+  padding-right: var(--page-padding);
+}
+
+html[data-viewport="xs"] .surface-card {
+  padding: var(--card-padding);
+}
+
+html[data-viewport="xs"] :where(
+    .detail-hero,
+    .detail-content-grid,
+    .race-weekend-section,
+    .race-weekend-details,
+    .calendar-grid,
+    .teams-grid,
+    .drivers-grid,
+    .circuits-grid,
+    .cards-schedule,
+    .cards-drivers,
+    .cards-teams,
+    .cards-circuits,
+    .store-showcase,
+    .store-catalog-layout,
+    .cart-layout,
+    .orders-layout,
+    .detail-layout
+  ) {
+  grid-template-columns: 1fr !important;
+}
+
+html[data-viewport="xs"] .navbar-collapse,
+html[data-viewport="xs"] .mini-collapse {
+  max-height: calc(var(--vh, 1vh) * 100 - 68px);
+  overflow-y: auto;
+}

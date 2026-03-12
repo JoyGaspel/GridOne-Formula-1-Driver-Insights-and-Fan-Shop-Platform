@@ -1,0 +1,256 @@
+.team-card {
+  position: relative;
+  --team-accent: #dc0000;
+  background: color-mix(in srgb, var(--team-accent) 18%, #110c0d);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 24px 44px -34px rgba(0, 0, 0, 0.72);
+  transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+  animation: cardRise 0.55s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes cardRise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 30px 56px -36px rgba(0, 0, 0, 0.86);
+}
+
+.team-image {
+  position: relative;
+  min-height: 296px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--team-accent) 96%, #ffffff) 0%, color-mix(in srgb, var(--team-accent) 82%, #111827) 100%);
+}
+
+.team-image::before,
+.team-image::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.team-image::before {
+  left: 0;
+  right: 18%;
+  top: 0;
+  bottom: 0;
+  opacity: 0.18;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.14), transparent 30%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.36) 1.1px, transparent 1.1px);
+  background-size: 100% 100%, 7px 7px;
+  background-position: 0 0, 0 0;
+}
+
+.team-image::after {
+  top: 22%;
+  left: 28%;
+  right: 0;
+  bottom: 18px;
+  opacity: 0.22;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 46%, transparent 100%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.52) 1px, transparent 1px);
+  background-size: 100% 100%, 6px 6px;
+  background-position: 0 0, 0 0;
+}
+
+.team-copy {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  right: 5.8rem;
+  z-index: 3;
+}
+
+.team-name {
+  margin: 0;
+  font-size: clamp(1.85rem, 2.4vw, 2.35rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 900;
+  color: color-mix(in srgb, var(--team-accent) 34%, #ffffff);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.24);
+}
+
+.team-drivers-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.75rem;
+  margin-top: 0.8rem;
+}
+
+.team-driver-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--team-accent) 24%, #ffffff);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+}
+
+.team-driver-pill::before {
+  content: "";
+  width: 0.88rem;
+  height: 0.88rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, #ffffff 78%, var(--team-accent));
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.14);
+}
+
+.team-photo {
+  position: absolute;
+  width: min(84%, 560px);
+  left: 50%;
+  right: auto;
+  bottom: 46px;
+  height: auto;
+  object-fit: contain;
+  object-position: center bottom;
+  z-index: 2;
+  transform: translateX(-50%) scale(0.88);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card:hover .team-photo {
+  transform: translateX(-50%) scale(0.91) translateY(-2px);
+}
+
+.team-logo-mark {
+  position: absolute;
+  right: 1.35rem;
+  top: 1.35rem;
+  left: auto;
+  z-index: 4;
+  height: 3.8rem;
+  width: 3.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(10, 14, 24, 0.28);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
+}
+
+.team-logo-mark img {
+  max-width: 65%;
+  max-height: 65%;
+  object-fit: contain;
+}
+
+.team-logo-placeholder {
+  position: absolute;
+  right: 1.35rem;
+  top: 1.35rem;
+  z-index: 4;
+  width: 3.8rem;
+  height: 3.8rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  background: rgba(10, 14, 24, 0.28);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  opacity: 0.95;
+}
+
+.image-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(7, 7, 10, 0.14) 0%, rgba(7, 7, 10, 0.02) 30%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 28%);
+}
+
+.team-meta {
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 0.9rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.team-base {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.96);
+  background: rgba(6, 10, 18, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(3px);
+}
+
+.card-rail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.28s ease;
+}
+
+.team-card:hover .card-rail {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 768px) {
+  .team-image {
+    min-height: 272px;
+  }
+
+  .team-copy {
+    top: 1.1rem;
+    left: 1.1rem;
+    right: 5rem;
+  }
+
+  .team-name {
+    font-size: 1.65rem;
+  }
+
+  .team-driver-pill {
+    font-size: 0.84rem;
+  }
+
+  .team-photo {
+    width: min(88%, 460px);
+    left: 50%;
+    bottom: 44px;
+    transform: translateX(-50%) scale(0.9);
+  }
+
+  .team-logo-mark,
+  .team-logo-placeholder {
+    width: 3.2rem;
+    height: 3.2rem;
+    right: 1rem;
+    top: 1rem;
+  }
+}
+
