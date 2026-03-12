@@ -1,0 +1,112 @@
+.circuits-page {
+  --circuits-primary: #dc0000;
+  --circuits-border: rgba(255, 255, 255, 0.16);
+  --circuits-card: rgba(20, 20, 24, 0.86);
+  --circuits-text: #f3f5f8;
+  --circuits-muted: #c9ced8;
+  min-height: 100vh;
+  background:
+    radial-gradient(1000px 520px at 10% -12%, rgba(255, 90, 90, 0.2), transparent 58%),
+    radial-gradient(900px 520px at 100% -10%, rgba(140, 0, 0, 0.22), transparent 56%),
+    linear-gradient(to bottom, #c40000 0%, #000000 70%);
+  background-attachment: fixed;
+  color: #ffffff;
+}
+
+.circuits-main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 5.4rem 1rem 2.4rem;
+}
+
+.circuits-header {
+  margin-bottom: 1.9rem;
+  max-width: 980px;
+}
+
+.circuits-title {
+  margin: 0;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.circuits-subtitle {
+  max-width: 760px;
+  margin: 1rem 0 0;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  color: #f2f5fb;
+  line-height: 1.5;
+}
+
+.circuits-grid > p {
+  color: #eef2fa;
+}
+
+.circuits-kpis {
+  margin-top: 1.4rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.circuits-kpi-item {
+  border: 1px solid color-mix(in srgb, var(--circuits-border) 72%, transparent);
+  border-radius: 14px;
+  padding: 0.8rem 0.95rem;
+  background: color-mix(in srgb, var(--circuits-card) 80%, black 20%);
+}
+
+.circuits-kpi-value {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--circuits-text);
+}
+
+.circuits-kpi-label {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--circuits-muted);
+}
+
+.circuits-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+
+@media (min-width: 640px) {
+  .circuits-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .circuits-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .circuits-main {
+    padding: 4.8rem 1rem 2rem;
+  }
+
+  .circuits-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .circuits-subtitle {
+    font-size: 0.95rem;
+  }
+}
+

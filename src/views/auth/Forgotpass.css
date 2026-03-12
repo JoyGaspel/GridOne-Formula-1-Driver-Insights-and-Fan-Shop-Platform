@@ -1,0 +1,248 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #dc0000;
+  --primary-hover: #b30000;
+  --border: rgba(255, 255, 255, 0.08);
+  --muted: #9ca3af;
+}
+
+body {
+  font-family: "Titillium Web", "Segoe UI", Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+}
+
+/* ===== Container ===== */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #c40000 0%, #000 70%);
+  padding: 1rem;
+  position: relative;
+  overflow-y: auto;
+}
+
+.background-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.background-pattern {
+  position: absolute;
+  inset: 0;
+}
+
+/* ===== Card ===== */
+.forgot-card {
+  width: min(440px, 100%);
+  max-width: 440px;
+  background-color: #1a1a1a;
+  border-radius: 20px;
+  padding: 2.25rem 1.75rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+  position: relative;
+  z-index: 10;
+  border: 1px solid var(--border);
+  text-align: center;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+/* ===== Logo ===== */
+.logo {
+  display: flex;
+  justify-content: center;
+}
+
+.logo img {
+  height: 10rem;
+  width: auto;
+}
+
+/* ===== Title & Subtitle ===== */
+.title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: rgb(150, 150, 150);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  padding: 0 0.5rem;
+}
+
+/* ===== Form ===== */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form + .form {
+  margin-top: 1.25rem;
+}
+
+.input-group {
+  position: relative;
+}
+
+.password-input {
+  padding-right: 3.25rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggle-password:hover {
+  color: #aaa;
+}
+
+.toggle-password:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.eye-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.input-field {
+  width: 100%;
+  background-color: #0a0a0a;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #2a2a2a;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.input-field::placeholder {
+  color: #666;
+}
+
+.input-field:focus {
+  border-color: var(--primary);
+}
+
+/* ===== Button ===== */
+.submit-button {
+  width: 100%;
+  background-color: var(--primary);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 9999px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.submit-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.forgot-status {
+  margin-top: 14px;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.forgot-status.success {
+  color: #bcffd9;
+  border: 1px solid rgba(41, 214, 122, 0.45);
+  background: rgba(41, 214, 122, 0.14);
+}
+
+.forgot-status.error {
+  color: #ffc8c8;
+  border: 1px solid rgba(255, 103, 103, 0.45);
+  background: rgba(255, 103, 103, 0.14);
+}
+
+/* ===== Footer ===== */
+.forgot-footer-links {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.forgot-login-link {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-login-link:hover {
+  color: #93c5fd;
+}
+
+.forgot-footer-separator {
+  color: #6b7280;
+}
+
+.forgot-home-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-home-link:hover {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+@media (max-height: 760px) {
+  .container {
+    align-items: flex-start;
+  }
+
+  .forgot-card {
+    margin-top: 1rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .logo img {
+    height: 7rem;
+  }
+}
+
