@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition, useDeferredValue } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MiniStoreNavbar from "../../components/MiniStoreNavbar";
 import {
@@ -33,7 +33,30 @@ const PRODUCTS_TABLE = "store_products";
 const DISCOUNTS_TABLE = "store_discounts";
 const OTP_TRANSACTIONS_TABLE = "store_otp_transactions";
 const PAYMENT_EVENTS_TABLE = "store_payment_events";
+const STORE_PRODUCTS_CACHE_KEY = "gridone_store_products_cache_v1";
+const STORE_DISCOUNTS_CACHE_KEY = "gridone_store_discounts_cache_v1";
 const cartItemKey = (id, size) => `${id}::${size}`;
+
+const readCachedList = (key) => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeCachedList = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore cache failures
+  }
+};
 
 const normalizeCartItems = (items) => {
   const merged = new Map();
@@ -382,6 +405,11 @@ export default function Store() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [products, setProducts] = useState(STORE_PRODUCTS);
   const [discounts, setDiscounts] = useState([]);
+  const [isPending, startTransition] = useTransition();
+  const deferredQuery = useDeferredValue(query);
+  const runTransition = useCallback((fn) => {
+    startTransition(fn);
+  }, [startTransition]);
 
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -440,7 +468,7 @@ export default function Store() {
       .order("created_at", { ascending: false });
 
     if (error || !Array.isArray(data)) {
-      setProducts(STORE_PRODUCTS);
+      setProducts((prev) => (prev.length > 0 ? prev : STORE_PRODUCTS));
       return;
     }
 
@@ -460,6 +488,7 @@ export default function Store() {
     }));
 
     setProducts(normalized);
+    writeCachedList(STORE_PRODUCTS_CACHE_KEY, normalized);
   }, []);
 
   const loadDiscounts = useCallback(async () => {
@@ -470,11 +499,12 @@ export default function Store() {
       .order("priority", { ascending: true });
 
     if (error || !Array.isArray(data)) {
-      setDiscounts([]);
+      setDiscounts((prev) => prev);
       return;
     }
 
     setDiscounts(data);
+    writeCachedList(STORE_DISCOUNTS_CACHE_KEY, data);
   }, []);
 
   const applyCheckoutAddress = (address) => {
@@ -501,6 +531,14 @@ export default function Store() {
   };
 
   useEffect(() => {
+    const cachedProducts = readCachedList(STORE_PRODUCTS_CACHE_KEY);
+    const cachedDiscounts = readCachedList(STORE_DISCOUNTS_CACHE_KEY);
+    if (cachedProducts.length > 0) {
+      setProducts(cachedProducts);
+    }
+    if (cachedDiscounts.length > 0) {
+      setDiscounts(cachedDiscounts);
+    }
     const preset = location.state?.storePreset;
     const searchParams = new URLSearchParams(location.search || "");
     const teamFromQuery = searchParams.get("team");
@@ -656,6 +694,18 @@ export default function Store() {
         }
         setIsHydrated(true);
         return;
+      }
+
+      // Optimistic: show cached/local data immediately while DB syncs
+      readLocalState();
+      const storedAddresses = parseStoredAddresses(localStorage.getItem(ADDRESS_LIST_KEY));
+      const legacyAddress = parseStoredAddress(localStorage.getItem(ADDRESS_KEY));
+      const mergedRaw = storedAddresses.length > 0 ? storedAddresses : legacyAddress ? [legacyAddress] : [];
+      const merged = normalizeAddressList(mergedRaw);
+      const defaultAddress = selectDefaultAddress(merged);
+      if (defaultAddress) {
+        setSavedAddresses(merged);
+        applyCheckoutAddress(defaultAddress);
       }
 
       const [
@@ -955,7 +1005,7 @@ export default function Store() {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
+    const normalized = deferredQuery.trim().toLowerCase();
     const getCategoryBucket = (product) => {
       const raw = String(product?.category || "").toLowerCase();
       if (raw === "men") return "Men";
@@ -1001,7 +1051,7 @@ export default function Store() {
     }
 
     return [...filtered].sort((a, b) => b.stock - a.stock);
-  }, [products, activeCategory, activeTeam, activeDriver, query, sortBy, activePriceBand]);
+  }, [products, activeCategory, activeTeam, activeDriver, deferredQuery, sortBy, activePriceBand]);
 
   const categoryCounts = useMemo(() => {
     const getCategoryBucket = (product) => {
@@ -1101,6 +1151,17 @@ export default function Store() {
       ? uniqueImages
       : [placeHolderImage(product.team || product.name || "Product")];
   };
+
+  const prefetchProductImages = useCallback(
+    (product) => {
+      const images = getProductImages(product);
+      images.slice(0, 3).forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    },
+    [getProductImages],
+  );
 
   const getSellingPoints = (product) => {
     if (product.category === "Jackets") {
@@ -1229,6 +1290,11 @@ export default function Store() {
   const requireLoggedIn = async () => {
     if (userId) {
       return true;
+    }
+    if (isHydrated && !userId) {
+      setNotice("Please log in first to use MiniStore features.");
+      navigate(ROUTE_PATHS.LOGIN);
+      return false;
     }
 
     const {
@@ -1948,54 +2014,62 @@ export default function Store() {
       <div className="store-page">
         <MiniStoreNavbar
           onOpenHome={() => {
-            goToView("catalog");
-            setActiveCategory("Men");
-            setActiveTeam("All Teams");
-            setActiveDriver("All Drivers");
-            setActivePriceBand("all");
-            setSortBy("recommended");
-            setQuery("");
-            setActiveDepartment("Men");
+            runTransition(() => {
+              goToView("catalog");
+              setActiveCategory("Men");
+              setActiveTeam("All Teams");
+              setActiveDriver("All Drivers");
+              setActivePriceBand("all");
+              setSortBy("recommended");
+              setQuery("");
+              setActiveDepartment("Men");
+            });
           }}
           onOpenCart={async () => {
             if (!(await requireLoggedIn())) {
               return;
             }
-            goToView("cart");
+            runTransition(() => goToView("cart"));
           }}
           onOpenOrders={async () => {
             if (!(await requireLoggedIn())) {
               return;
             }
-            goToView("orders");
+            runTransition(() => goToView("orders"));
           }}
           onOpenFilters={() => {
-            if (view !== "catalog") {
-              goToView("catalog");
-            }
-            setSidebarOpen(true);
+            runTransition(() => {
+              if (view !== "catalog") {
+                goToView("catalog");
+              }
+              setSidebarOpen(true);
+            });
           }}
           departments={DEPARTMENT_TABS}
           activeDepartment={activeDepartment}
           onDepartmentSelect={(value) => {
-            setActiveDepartment(value);
-            if (["Men", "Women", "Kids", "Headwear", "Accessories", "Collectibles"].includes(value)) {
-              setActiveCategory(value);
-            } else {
-              setActiveCategory("All");
-            }
-            if (value === "Shop By Driver") {
-              setActiveTeam("All Teams");
-            } else if (value === "Shop By Team") {
-              setActiveDriver("All Drivers");
-            }
-            goToView("catalog");
+            runTransition(() => {
+              setActiveDepartment(value);
+              if (["Men", "Women", "Kids", "Headwear", "Accessories", "Collectibles"].includes(value)) {
+                setActiveCategory(value);
+              } else {
+                setActiveCategory("All");
+              }
+              if (value === "Shop By Driver") {
+                setActiveTeam("All Teams");
+              } else if (value === "Shop By Team") {
+                setActiveDriver("All Drivers");
+              }
+              goToView("catalog");
+            });
           }}
           cartCount={cartCount}
           searchValue={query}
           onSearchChange={(value) => {
-            setQuery(value);
-            goToView("catalog");
+            runTransition(() => {
+              setQuery(value);
+              goToView("catalog");
+            });
           }}
         />
 
@@ -2026,10 +2100,12 @@ export default function Store() {
                           key={driver}
                           type="button"
                           className={`team-filter-item ${driver === activeDriver ? "active" : ""}`}
-                          onClick={() => {
+                        onClick={() => {
+                          runTransition(() => {
                             setActiveDriver(driver);
                             goToView("catalog");
-                          }}
+                          });
+                        }}
                         >
                           <span className="team-filter-dot" />
                           {driver}
@@ -2041,8 +2117,10 @@ export default function Store() {
                           type="button"
                           className={`team-filter-item ${team === activeTeam ? "active" : ""}`}
                           onClick={() => {
-                            setActiveTeam(team);
-                            goToView("catalog");
+                            runTransition(() => {
+                              setActiveTeam(team);
+                              goToView("catalog");
+                            });
                           }}
                         >
                           <span className="team-filter-dot" />
@@ -2064,8 +2142,10 @@ export default function Store() {
                         type="button"
                         className={`team-filter-item ${category === activeCategory ? "active" : ""}`}
                         onClick={() => {
-                          setActiveCategory(category);
-                          goToView("catalog");
+                          runTransition(() => {
+                            setActiveCategory(category);
+                            goToView("catalog");
+                          });
                         }}
                       >
                         <span className="team-filter-dot" />
@@ -2081,28 +2161,28 @@ export default function Store() {
                   <button
                     type="button"
                     className={`team-filter-item ${activePriceBand === "all" ? "active" : ""}`}
-                    onClick={() => setActivePriceBand("all")}
+                    onClick={() => runTransition(() => setActivePriceBand("all"))}
                   >
                     All prices
                   </button>
                   <button
                     type="button"
                     className={`team-filter-item ${activePriceBand === "budget" ? "active" : ""}`}
-                    onClick={() => setActivePriceBand("budget")}
+                    onClick={() => runTransition(() => setActivePriceBand("budget"))}
                   >
                     Under PHP 2,000
                   </button>
                   <button
                     type="button"
                     className={`team-filter-item ${activePriceBand === "mid" ? "active" : ""}`}
-                    onClick={() => setActivePriceBand("mid")}
+                    onClick={() => runTransition(() => setActivePriceBand("mid"))}
                   >
                     PHP 2,000-6,000
                   </button>
                   <button
                     type="button"
                     className={`team-filter-item ${activePriceBand === "premium" ? "active" : ""}`}
-                    onClick={() => setActivePriceBand("premium")}
+                    onClick={() => runTransition(() => setActivePriceBand("premium"))}
                   >
                     Above PHP 6,000
                   </button>
@@ -2116,7 +2196,9 @@ export default function Store() {
                     <select
                       id="store-sort"
                       value={sortBy}
-                      onChange={(event) => setSortBy(event.target.value)}
+                      onChange={(event) =>
+                        runTransition(() => setSortBy(event.target.value))
+                      }
                     >
                       <option value="recommended">Recommended</option>
                       <option value="price-asc">Price: Low to High</option>
@@ -2127,7 +2209,7 @@ export default function Store() {
                     <button
                       type="button"
                       className="catalog-filter-toggle"
-                      onClick={() => setSidebarOpen(true)}
+                      onClick={() => runTransition(() => setSidebarOpen(true))}
                     >
                       Filters
                     </button>
@@ -2141,6 +2223,8 @@ export default function Store() {
                       className="product-card"
                       role="button"
                       tabIndex={0}
+                      onMouseEnter={() => prefetchProductImages(product)}
+                      onFocus={() => prefetchProductImages(product)}
                       onClick={() => openDetails(product)}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
@@ -2161,6 +2245,8 @@ export default function Store() {
                         <img
                           src={product.image}
                           alt={product.name}
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             e.currentTarget.src = placeHolderImage(product.team);
                           }}
@@ -2217,7 +2303,7 @@ export default function Store() {
                                 return;
                               }
                               addToCart(product, product.sizes[0] || "One Size", 1);
-                              goToView("cart");
+                              runTransition(() => goToView("cart"));
                             }}
                           >
                             Buy Now
@@ -2257,6 +2343,8 @@ export default function Store() {
                     <img
                       src={getProductImages(selectedProduct)[selectedImageIndex] || selectedProduct.image}
                       alt={selectedProduct.name}
+                      loading="eager"
+                      decoding="async"
                       onError={(e) => {
                         e.currentTarget.src = placeHolderImage(selectedProduct.team);
                       }}
@@ -2303,6 +2391,8 @@ export default function Store() {
                       <img
                         src={image}
                         alt={`${selectedProduct.name} preview ${index + 1}`}
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.src = placeHolderImage(selectedProduct.team);
                         }}

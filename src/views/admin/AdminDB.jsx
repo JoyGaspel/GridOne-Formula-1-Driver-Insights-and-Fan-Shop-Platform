@@ -155,6 +155,31 @@ const ADMIN_DELETE_STORE_PRODUCT_RPC = "admin_delete_store_product";
 const ADMIN_LIST_STORE_DISCOUNTS_RPC = "admin_list_store_discounts";
 const ADMIN_UPSERT_STORE_DISCOUNT_RPC = "admin_upsert_store_discount";
 const ADMIN_DELETE_STORE_DISCOUNT_RPC = "admin_delete_store_discount";
+const STORE_ORDERS_CACHE_KEY = "gridone_admin_store_orders_v1";
+const STORE_CARTS_CACHE_KEY = "gridone_admin_store_carts_v1";
+const STORE_PRODUCTS_CACHE_KEY = "gridone_admin_store_products_v1";
+const STORE_DISCOUNTS_CACHE_KEY = "gridone_admin_store_discounts_v1";
+
+function readCachedList(key) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeCachedList(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Ignore cache write failures
+  }
+}
 
 function isDataUrl(value) {
   return /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(String(value || "").trim());
@@ -728,6 +753,8 @@ const AdminDashboard = () => {
   const [zoomImageSrc, setZoomImageSrc] = useState("");
   const [pendingDelete, setPendingDelete] = useState(null);
   const [previewState, setPreviewState] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [previewImageIndex, setPreviewImageIndex] = useState(0);
   const [pendingLogout, setPendingLogout] = useState(false);
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [adminUser, setAdminUser] = useState(null);
@@ -782,7 +809,9 @@ const AdminDashboard = () => {
     const errors = [];
 
     if (!ordersRpc.error && Array.isArray(ordersRpc.data)) {
-      setStoreOrders(ordersRpc.data.map(normalizeStoreOrder).filter(Boolean));
+      const normalizedOrders = ordersRpc.data.map(normalizeStoreOrder).filter(Boolean);
+      setStoreOrders(normalizedOrders);
+      writeCachedList(STORE_ORDERS_CACHE_KEY, normalizedOrders);
     } else {
       if (ordersRpc.error) {
         errors.push(
@@ -795,14 +824,16 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        setStoreOrders(data.map(normalizeStoreOrder).filter(Boolean));
-      } else {
-        setStoreOrders([]);
+        const normalizedOrders = data.map(normalizeStoreOrder).filter(Boolean);
+        setStoreOrders(normalizedOrders);
+        writeCachedList(STORE_ORDERS_CACHE_KEY, normalizedOrders);
       }
     }
 
     if (!cartsRpc.error && Array.isArray(cartsRpc.data)) {
-      setStoreCarts(cartsRpc.data.map(normalizeStoreCartItem).filter(Boolean));
+      const normalizedCarts = cartsRpc.data.map(normalizeStoreCartItem).filter(Boolean);
+      setStoreCarts(normalizedCarts);
+      writeCachedList(STORE_CARTS_CACHE_KEY, normalizedCarts);
     } else {
       if (cartsRpc.error) {
         errors.push(
@@ -815,9 +846,9 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        setStoreCarts(data.map(normalizeStoreCartItem).filter(Boolean));
-      } else {
-        setStoreCarts([]);
+        const normalizedCarts = data.map(normalizeStoreCartItem).filter(Boolean);
+        setStoreCarts(normalizedCarts);
+        writeCachedList(STORE_CARTS_CACHE_KEY, normalizedCarts);
       }
     }
 
@@ -833,10 +864,12 @@ const AdminDashboard = () => {
     const rpc = await supabase.rpc(ADMIN_LIST_STORE_PRODUCTS_RPC);
 
     if (!rpc.error && Array.isArray(rpc.data)) {
+      const normalizedProducts = rpc.data.map(normalizeStoreProduct).filter(Boolean);
       setDbData((prev) => ({
         ...prev,
-        products: rpc.data.map(normalizeStoreProduct).filter(Boolean),
+        products: normalizedProducts,
       }));
+      writeCachedList(STORE_PRODUCTS_CACHE_KEY, normalizedProducts);
       return;
     }
 
@@ -846,10 +879,12 @@ const AdminDashboard = () => {
       .order("created_at", { ascending: false });
 
     if (!error && Array.isArray(data)) {
+      const normalizedProducts = data.map(normalizeStoreProduct).filter(Boolean);
       setDbData((prev) => ({
         ...prev,
-        products: data.map(normalizeStoreProduct).filter(Boolean),
+        products: normalizedProducts,
       }));
+      writeCachedList(STORE_PRODUCTS_CACHE_KEY, normalizedProducts);
     }
   }, []);
 
@@ -858,10 +893,12 @@ const AdminDashboard = () => {
     const rpc = await supabase.rpc(ADMIN_LIST_STORE_DISCOUNTS_RPC);
 
     if (!rpc.error && Array.isArray(rpc.data)) {
+      const normalizedDiscounts = rpc.data.map(normalizeStoreDiscount).filter(Boolean);
       setDbData((prev) => ({
         ...prev,
-        discounts: rpc.data.map(normalizeStoreDiscount).filter(Boolean),
+        discounts: normalizedDiscounts,
       }));
+      writeCachedList(STORE_DISCOUNTS_CACHE_KEY, normalizedDiscounts);
       return;
     }
 
@@ -871,10 +908,12 @@ const AdminDashboard = () => {
       .order("priority", { ascending: true });
 
     if (!error && Array.isArray(data)) {
+      const normalizedDiscounts = data.map(normalizeStoreDiscount).filter(Boolean);
       setDbData((prev) => ({
         ...prev,
-        discounts: data.map(normalizeStoreDiscount).filter(Boolean),
+        discounts: normalizedDiscounts,
       }));
+      writeCachedList(STORE_DISCOUNTS_CACHE_KEY, normalizedDiscounts);
       return;
     }
 
@@ -1023,6 +1062,27 @@ const AdminDashboard = () => {
       setActiveSection(MGMT_STORE_ORDERS_SECTION);
     }
   }, [location.pathname, activeSection]);
+
+  useEffect(() => {
+    const cachedOrders = readCachedList(STORE_ORDERS_CACHE_KEY).map(normalizeStoreOrder).filter(Boolean);
+    const cachedCarts = readCachedList(STORE_CARTS_CACHE_KEY).map(normalizeStoreCartItem).filter(Boolean);
+    const cachedProducts = readCachedList(STORE_PRODUCTS_CACHE_KEY).map(normalizeStoreProduct).filter(Boolean);
+    const cachedDiscounts = readCachedList(STORE_DISCOUNTS_CACHE_KEY).map(normalizeStoreDiscount).filter(Boolean);
+
+    if (cachedOrders.length > 0) {
+      setStoreOrders(cachedOrders);
+    }
+    if (cachedCarts.length > 0) {
+      setStoreCarts(cachedCarts);
+    }
+    if (cachedProducts.length > 0 || cachedDiscounts.length > 0) {
+      setDbData((prev) => ({
+        ...prev,
+        products: cachedProducts.length > 0 ? cachedProducts : prev.products,
+        discounts: cachedDiscounts.length > 0 ? cachedDiscounts : prev.discounts,
+      }));
+    }
+  }, []);
 
   useEffect(() => {
     if (activeSection === MGMT_ADMINS_SECTION && !isCurrentSuperAdmin) {
@@ -2618,7 +2678,134 @@ const AdminDashboard = () => {
     previewState?.row?.location ||
     previewState?.row?.team ||
     "-";
-  const previewImage = previewState?.row?.image || PLACEHOLDER_IMAGE;
+  const normalizeMatchValue = useCallback((value) => {
+    return String(value || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+  }, []);
+
+  const resolveDiscountImage = useCallback(
+    (discount) => {
+      const directImage = String(discount?.image || "").trim();
+      if (directImage) {
+        return directImage;
+      }
+      const productIds = Array.isArray(discount?.product_ids) ? discount.product_ids : [];
+      const firstProductId = productIds.find((id) => String(id || "").trim());
+      if (!firstProductId) {
+        return "";
+      }
+      const matchedProduct = (dbData.products ?? []).find(
+        (product) => String(product?.id || "").trim() === String(firstProductId).trim(),
+      );
+      if (!matchedProduct) {
+        return "";
+      }
+      const primaryImage = String(matchedProduct.image || "").trim();
+      if (primaryImage) {
+        return primaryImage;
+      }
+      const images = Array.isArray(matchedProduct.images) ? matchedProduct.images : [];
+      return String(images[0] || "").trim();
+    },
+    [dbData.products],
+  );
+  const resolveDiscountImages = useCallback(
+    (discount) => {
+      const unique = new Set();
+      const directImage = String(discount?.image || "").trim();
+      if (directImage) {
+        unique.add(directImage);
+      }
+      const products = dbData.products ?? [];
+      const productIds = Array.isArray(discount?.product_ids) ? discount.product_ids : [];
+      const categories = Array.isArray(discount?.categories) ? discount.categories : [];
+      const teams = Array.isArray(discount?.teams) ? discount.teams : [];
+      const drivers = Array.isArray(discount?.drivers) ? discount.drivers : [];
+
+      const matchesList = (list, value) => {
+        if (!Array.isArray(list) || list.length === 0) {
+          return false;
+        }
+        const normalizedValue = normalizeMatchValue(value);
+        if (!normalizedValue) {
+          return false;
+        }
+        return list.some((entry) => normalizeMatchValue(entry) === normalizedValue);
+      };
+
+      const collectProductImages = (matchedProduct) => {
+        if (!matchedProduct) {
+          return;
+        }
+        const primaryImage = String(matchedProduct.image || "").trim();
+        if (primaryImage) {
+          unique.add(primaryImage);
+        }
+        const images = Array.isArray(matchedProduct.images) ? matchedProduct.images : [];
+        images.forEach((image) => {
+          const trimmed = String(image || "").trim();
+          if (trimmed) {
+            unique.add(trimmed);
+          }
+        });
+      };
+
+      if (productIds.length > 0) {
+        productIds.forEach((productId) => {
+          const matchedProduct = products.find(
+            (product) => String(product?.id || "").trim() === String(productId || "").trim(),
+          );
+          collectProductImages(matchedProduct);
+        });
+      }
+
+      products.forEach((product) => {
+        if (
+          matchesList(categories, product?.category) ||
+          matchesList(teams, product?.team) ||
+          matchesList(drivers, product?.driver)
+        ) {
+          collectProductImages(product);
+        }
+      });
+
+      return Array.from(unique).filter(Boolean);
+    },
+    [dbData.products, normalizeMatchValue],
+  );
+  const previewImages = useMemo(() => {
+    if (!previewState) {
+      return [PLACEHOLDER_IMAGE];
+    }
+    if (previewState.section === "products") {
+      const normalizedImages = normalizeProductImages(
+        previewState?.row?.images,
+        previewState?.row?.image,
+      );
+      return normalizedImages.length > 0 ? normalizedImages : [PLACEHOLDER_IMAGE];
+    }
+    if (previewState.section === "discounts") {
+      const discountImages = resolveDiscountImages(previewState?.row);
+      return discountImages.length > 0 ? discountImages : [PLACEHOLDER_IMAGE];
+    }
+    return [previewState?.row?.image || PLACEHOLDER_IMAGE];
+  }, [previewState, resolveDiscountImage, resolveDiscountImages]);
+  const previewImage = previewImages[previewImageIndex] || PLACEHOLDER_IMAGE;
+  const hasPreviewCarousel =
+    (previewState?.section === "products" || previewState?.section === "discounts") &&
+    previewImages.length > 1;
+  const goToPrevPreviewImage = useCallback(() => {
+    setPreviewImageIndex((prev) =>
+      previewImages.length === 0 ? 0 : (prev - 1 + previewImages.length) % previewImages.length,
+    );
+  }, [previewImages.length]);
+  const goToNextPreviewImage = useCallback(() => {
+    setPreviewImageIndex((prev) =>
+      previewImages.length === 0 ? 0 : (prev + 1) % previewImages.length,
+    );
+  }, [previewImages.length]);
   const previewInitials = previewTitle
     .split(/\s+/)
     .filter(Boolean)
@@ -2626,6 +2813,7 @@ const AdminDashboard = () => {
     .map((part) => (part.match(/[A-Za-z]/)?.[0] || "").toUpperCase())
     .join("");
   const safePreviewInitials = previewInitials || "GO";
+  const showPreviewInitials = false;
   const previewDrivers = Array.isArray(previewState?.row?.drivers) ? previewState.row.drivers : [];
   const previewDescription =
     previewState?.row?.description ||
@@ -2638,6 +2826,16 @@ const AdminDashboard = () => {
   const previewSecondarySpecs = previewFields.filter(
     (field) => !previewPrimarySpecs.includes(field) && field !== "description" && field !== "longDescription",
   );
+
+  useEffect(() => {
+    setPreviewImageIndex(0);
+  }, [previewState?.row?.id, previewState?.section]);
+
+  useEffect(() => {
+    if (window.innerWidth > 900 && sidebarOpen) {
+      setSidebarOpen(false);
+    }
+  }, [sidebarOpen]);
 
   const handleLogout = async () => {
     setLogoutBusy(true);
@@ -2723,7 +2921,8 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="admin-db-page">
+    <div className={`admin-db-page ${sidebarOpen ? "sidebar-open" : ""}`}>
+      {sidebarOpen && <div className="admin-db-sidebar-scrim" onClick={() => setSidebarOpen(false)} />}
       <div className="admin-db-layout">
         <aside className="admin-db-sidebar">
           <div className="admin-db-sidebar-head">
@@ -2881,6 +3080,16 @@ const AdminDashboard = () => {
             </div>
             {!isArchiveView && !isAccountView && !isManagementView ? (
               <div className="admin-db-header-actions">
+                <button
+                  type="button"
+                  className="admin-db-menu-toggle"
+                  onClick={() => setSidebarOpen((prev) => !prev)}
+                  aria-label="Toggle sidebar"
+                >
+                  <span />
+                  <span />
+                  <span />
+                </button>
                 {activeSection === "products" && (
                   <button
                     type="button"
@@ -2896,11 +3105,33 @@ const AdminDashboard = () => {
                 </button>
               </div>
             ) : isManagementAdminsView && isCurrentSuperAdmin ? (
-              <button type="button" className="admin-db-add" onClick={openAddAdminModal}>
-                + Add Admin
-              </button>
+              <div className="admin-db-header-actions">
+                <button
+                  type="button"
+                  className="admin-db-menu-toggle"
+                  onClick={() => setSidebarOpen((prev) => !prev)}
+                  aria-label="Toggle sidebar"
+                >
+                  <span />
+                  <span />
+                  <span />
+                </button>
+                <button type="button" className="admin-db-add" onClick={openAddAdminModal}>
+                  + Add Admin
+                </button>
+              </div>
             ) : isManagementUsersView || isManagementBillingsView || isManagementStoreOrdersView || isManagementStoreCartsView ? (
               <div className="admin-db-header-actions">
+                <button
+                  type="button"
+                  className="admin-db-menu-toggle"
+                  onClick={() => setSidebarOpen((prev) => !prev)}
+                  aria-label="Toggle sidebar"
+                >
+                  <span />
+                  <span />
+                  <span />
+                </button>
                 {isManagementUsersView && (
                   <button
                     type="button"
@@ -2922,7 +3153,20 @@ const AdminDashboard = () => {
                   </button>
                 )}
               </div>
-            ) : null}
+            ) : (
+              <div className="admin-db-header-actions">
+                <button
+                  type="button"
+                  className="admin-db-menu-toggle"
+                  onClick={() => setSidebarOpen((prev) => !prev)}
+                  aria-label="Toggle sidebar"
+                >
+                  <span />
+                  <span />
+                  <span />
+                </button>
+              </div>
+            )}
           </header>
 
           {error && <p className="admin-db-error">{error}</p>}
@@ -3542,10 +3786,39 @@ const AdminDashboard = () => {
                               {getSafeColor(row[field])}
                             </span>
                           ) : field === "image" ? (
-                            activeSection === "products" && String(row[field] ?? "").trim() ? (
-                              <div className="admin-db-billing-image" title={String(row[field] ?? "")}>
-                                <img src={row[field]} alt={row.name || "Product image"} />
-                              </div>
+                            ["products", "discounts"].includes(activeSection) &&
+                            (activeSection === "discounts"
+                              ? resolveDiscountImages(row).length > 0
+                              : String(row[field] ?? "").trim()) ? (
+                              activeSection === "discounts" ? (
+                                <div className="admin-db-thumb-row" title={row.name || "Discount images"}>
+                                  {resolveDiscountImages(row)
+                                    .slice(0, 4)
+                                    .map((image, index) => (
+                                      <button
+                                        key={`${row.id}-discount-thumb-${index}`}
+                                        type="button"
+                                        className="admin-db-thumb"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          setZoomImageSrc(image);
+                                        }}
+                                        aria-label={`View discount image ${index + 1}`}
+                                      >
+                                        <img src={image} alt={`${row.name || "Discount"} ${index + 1}`} />
+                                      </button>
+                                    ))}
+                                  {resolveDiscountImages(row).length > 4 && (
+                                    <span className="admin-db-thumb-more">
+                                      +{resolveDiscountImages(row).length - 4}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="admin-db-billing-image" title={String(row[field] ?? "")}>
+                                  <img src={row[field]} alt={row.name || "Image"} />
+                                </div>
+                              )
                             ) : (
                               <span title={String(row[field] ?? "")}>
                                 {String(row[field] ?? "").trim() ? "image..." : "-"}
@@ -3813,9 +4086,34 @@ const AdminDashboard = () => {
               <div className="admin-db-preview-top">
                 <article className="admin-db-preview-hero">
                   <img src={previewImage} alt={previewTitle} />
-                  <div className="admin-db-preview-overlay">
-                    <span>{safePreviewInitials}</span>
-                  </div>
+                  {hasPreviewCarousel && (
+                    <div className="admin-db-preview-hero-controls">
+                      <button
+                        type="button"
+                        className="admin-db-preview-arrow"
+                        onClick={goToPrevPreviewImage}
+                        aria-label="Previous image"
+                      >
+                        &#8592;
+                      </button>
+                      <span className="admin-db-preview-count">
+                        {previewImageIndex + 1} / {previewImages.length}
+                      </span>
+                      <button
+                        type="button"
+                        className="admin-db-preview-arrow"
+                        onClick={goToNextPreviewImage}
+                        aria-label="Next image"
+                      >
+                        &#8594;
+                      </button>
+                    </div>
+                  )}
+                  {showPreviewInitials && (
+                    <div className="admin-db-preview-overlay">
+                      <span>{safePreviewInitials}</span>
+                    </div>
+                  )}
                 </article>
 
                 <article className="admin-db-preview-profile">
