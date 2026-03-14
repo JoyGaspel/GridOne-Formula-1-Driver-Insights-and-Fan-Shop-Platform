@@ -14,7 +14,7 @@ const resolveRole = (sessionUser) => {
   return metadataRole === "admin" || storedRole === "admin" ? "admin" : "user";
 };
 
-export default function Navbar() {
+export default function Navbar({ onProfileToggle }) {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState("user");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -51,17 +51,41 @@ export default function Navbar() {
           </div>
         </Link>
 
-        <button
-          type="button"
-          className={`navbar-toggle ${menuOpen ? "open" : ""}`}
-          aria-label="Toggle navigation menu"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((prev) => !prev)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+        <div className="navbar-toggle-group">
+          <button
+            type="button"
+            className={`navbar-toggle ${menuOpen ? "open" : ""}`}
+            aria-label="Toggle navigation menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          {onProfileToggle && (
+            <button
+              type="button"
+              className="navbar-profile-toggle"
+              aria-label="Toggle account navigation"
+              onClick={onProfileToggle}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M4 21a8 8 0 0 1 16 0"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
 
         <div className={`navbar-collapse ${menuOpen ? "open" : ""}`}>
           <div className="navbar-links">

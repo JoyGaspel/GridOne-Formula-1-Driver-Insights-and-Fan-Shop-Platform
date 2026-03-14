@@ -45,6 +45,14 @@
   gap: 1rem;
 }
 
+.account-sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 14, 0.7);
+  z-index: 20;
+}
+
+
 .account-sidebar-profile,
 .account-panel-wrap {
   background: linear-gradient(170deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
@@ -71,6 +79,11 @@
   color: #fff;
   font-weight: 800;
   font-size: 1.2rem;
+}
+
+.account-avatar svg {
+  width: 30px;
+  height: 30px;
 }
 
 .account-sidebar-name {
@@ -992,6 +1005,25 @@ select.field-input option {
   .account-layout {
     grid-template-columns: 1fr;
   }
+
+  .account-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(82vw, 280px);
+    height: 100vh;
+    padding: 1rem;
+    background: #111217;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+    z-index: 30;
+  }
+
+  .account-page.sidebar-open .account-sidebar {
+    transform: translateX(0);
+  }
+
 
   .account-panel-header {
     flex-direction: column;

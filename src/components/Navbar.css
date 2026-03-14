@@ -109,9 +109,14 @@
   gap: 12px;
 }
 
-.navbar-toggle {
+.navbar-toggle-group {
   display: none;
   margin-left: auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-toggle {
   width: 42px;
   height: 42px;
   border-radius: 10px;
@@ -130,6 +135,24 @@
   border-radius: 999px;
   background: #ffffff;
   transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.navbar-profile-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-profile-toggle svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* ========== BUTTON BASE ========== */
@@ -226,14 +249,22 @@
 
 /* ========== RESPONSIVE ========== */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .navbar-container {
     width: calc(100% - 16px);
     padding-left: 0;
     padding-right: 0;
   }
 
+  .navbar-toggle-group {
+    display: inline-flex;
+  }
+
   .navbar-toggle {
+    display: inline-flex;
+  }
+
+  .navbar-profile-toggle {
     display: inline-flex;
   }
 

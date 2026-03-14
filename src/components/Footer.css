@@ -1,0 +1,128 @@
+.site-footer {
+  background: #050505;
+  padding: 26px 0 30px;
+}
+
+.site-footer-panel {
+  max-width: none;
+  margin: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 26px 30px 22px;
+}
+
+.site-footer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.site-footer-title {
+  margin: 0;
+  color: #ffffff;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.site-footer-app-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #b30000;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid #d40000;
+}
+
+.site-footer-app-link:hover {
+  background: #c10000;
+}
+
+.site-footer-nav {
+  display: flex;
+  gap: 36px;
+  margin: 14px 0 22px;
+  flex-wrap: wrap;
+}
+
+.site-footer-nav a {
+  color: #f2f2f2;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+
+.site-footer-nav a:hover {
+  color: #ffffff;
+}
+
+.site-footer-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-footer-logo {
+  width: 52px;
+  height: auto;
+  display: block;
+}
+
+.site-footer-bar-fill {
+  flex: 1;
+  height: 14px;
+  background: #b30000;
+  border-radius: 3px;
+}
+
+.site-footer--ministore {
+  background: #ffffff;
+}
+
+.site-footer--ministore .site-footer-title {
+  color: #111111;
+}
+
+.site-footer--ministore .site-footer-nav a {
+  color: #111111;
+}
+
+.site-footer--ministore .site-footer-nav a:hover {
+  color: #000000;
+}
+
+.site-footer--ministore .site-footer-bar-fill {
+  background: #111111;
+}
+
+@media (max-width: 700px) {
+  .site-footer-panel {
+    margin: 0;
+  }
+
+  .site-footer-nav {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-footer-title {
+    font-size: 20px;
+  }
+
+  .site-footer-nav {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

@@ -155,6 +155,7 @@ export default function MyAccount() {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -827,7 +828,7 @@ export default function MyAccount() {
   if (loading) {
     return (
       <div className="account-page">
-        <Navbar />
+        <Navbar onProfileToggle={() => setSidebarOpen((prev) => !prev)} />
         <main className="account-main">
           <LoadingScreen message="Loading account... Please wait." />
         </main>
@@ -836,23 +837,46 @@ export default function MyAccount() {
   }
 
   return (
-    <div className="account-page">
-      <Navbar />
+    <div className={`account-page ${sidebarOpen ? "sidebar-open" : ""}`}>
+      {sidebarOpen && (
+        <div
+          className="account-sidebar-scrim"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <Navbar onProfileToggle={() => setSidebarOpen((prev) => !prev)} />
 
       <main className="account-main">
-        <section className="account-layout">
-          <aside className="account-sidebar">
-            <div className="account-sidebar-profile">
-              <div className="account-avatar">{sidebarInitials}</div>
-              <div>
-                <p className="account-sidebar-name">{sidebarName}</p>
-                <button
-                  type="button"
-                  className="account-sidebar-link"
-                  onClick={() => setActiveSection("profile")}
-                >
-                  Edit Profile
-                </button>
+          <section className="account-layout">
+            <aside className="account-sidebar">
+              <div className="account-sidebar-profile">
+              <div className="account-avatar" aria-label={`Profile for ${sidebarName}`}>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M4 21a8 8 0 0 1 16 0"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+                <div>
+                  <p className="account-sidebar-name">{sidebarName}</p>
+                  <button
+                    type="button"
+                    className="account-sidebar-link"
+                    onClick={() => {
+                      setActiveSection("profile");
+                      setSidebarOpen(false);
+                    }}
+                  >
+                    Edit Profile
+                  </button>
               </div>
             </div>
 
@@ -862,14 +886,20 @@ export default function MyAccount() {
                   <button
                     type="button"
                     className={`account-nav-item ${activeSection === "profile" ? "active" : ""}`}
-                    onClick={() => setActiveSection("profile")}
+                    onClick={() => {
+                      setActiveSection("profile");
+                      setSidebarOpen(false);
+                    }}
                   >
                     Profile
                   </button>
                   <button
                     type="button"
                     className={`account-nav-item ${activeSection === "addresses" ? "active" : ""}`}
-                    onClick={() => setActiveSection("addresses")}
+                    onClick={() => {
+                      setActiveSection("addresses");
+                      setSidebarOpen(false);
+                    }}
                   >
                     Addresses
                   </button>
@@ -878,14 +908,20 @@ export default function MyAccount() {
               <button
                 type="button"
                 className={`account-nav-item ${activeSection === "email" ? "active" : ""}`}
-                onClick={() => setActiveSection("email")}
+                onClick={() => {
+                  setActiveSection("email");
+                  setSidebarOpen(false);
+                }}
               >
                 Email Settings
               </button>
               <button
                 type="button"
                 className={`account-nav-item ${activeSection === "security" ? "active" : ""}`}
-                onClick={() => setActiveSection("security")}
+                onClick={() => {
+                  setActiveSection("security");
+                  setSidebarOpen(false);
+                }}
               >
                 Change Password
               </button>
@@ -894,14 +930,20 @@ export default function MyAccount() {
                   <button
                     type="button"
                     className={`account-nav-item ${activeSection === "overview" ? "active" : ""}`}
-                    onClick={() => setActiveSection("overview")}
+                    onClick={() => {
+                      setActiveSection("overview");
+                      setSidebarOpen(false);
+                    }}
                   >
                     Account Snapshot
                   </button>
                   <button
                     type="button"
                     className={`account-nav-item ${activeSection === "purchases" ? "active" : ""}`}
-                    onClick={() => setActiveSection("purchases")}
+                    onClick={() => {
+                      setActiveSection("purchases");
+                      setSidebarOpen(false);
+                    }}
                   >
                     My Purchases
                   </button>

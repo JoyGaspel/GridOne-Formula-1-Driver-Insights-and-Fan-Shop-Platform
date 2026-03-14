@@ -1417,6 +1417,15 @@ export default function Store() {
     },
     [updateHistory, view]
   );
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search || "");
+    const requestedView = String(searchParams.get("view") || "").toLowerCase();
+    if (requestedView === "cart" || requestedView === "orders") {
+      goToView(requestedView);
+    }
+  }, [location.search, goToView]);
+
   const goBack = useCallback(() => {
     const previous = viewStackRef.current.pop();
     if (!previous) {
