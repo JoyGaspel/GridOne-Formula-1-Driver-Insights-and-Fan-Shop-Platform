@@ -769,9 +769,1035 @@ const RAW_STORE_PRODUCTS = [
       "https://images.unsplash.com/photo-1511453650475-ca175d4aede0?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.0.3&q=60&w=3000",
     ],
   },
+  {
+    id: "audi-2026-replica-team-tshirt",
+    name: "Audi F1 2026 Replica Team T-Shirt",
+    category: "Shirts",
+    team: "Audi",
+    driver: "Teamwear",
+    price: 8990,
+    stock: 18,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official Audi F1 2026 replica team tee.",
+    details: "Performance fit with team and sponsor branding.",
+    image:
+      "https://images.footballfanatics.com/audi/audi-f1-2026-replica-team-t-shirt_ss5_p-203336863%2Bpv-6%2Bu-vnlrvmg8urttqlpy5hoi%2Bv-udbob6sgwmqju4fdtunr.png?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/audi/audi-f1-2026-replica-team-t-shirt_ss5_p-203336863%2Bpv-6%2Bu-vnlrvmg8urttqlpy5hoi%2Bv-udbob6sgwmqju4fdtunr.png?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "audi-adidas-dna-hoodie-black",
+    name: "Audi F1 adidas DNA Logo Hoodie - Black",
+    category: "Jackets",
+    team: "Audi",
+    driver: "Teamwear",
+    price: 9990,
+    stock: 14,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Audi F1 DNA hoodie with adidas heritage branding.",
+    details: "French terry pullover with drawcord hood.",
+    image:
+      "https://images.footballfanatics.com/audi/audi-f1-adidas-dna-logo-hoodie-black_ss5_p-203336852%2Bpv-6%2Bu-fag8csejjc26lfed1lhx%2Bv-khhuwivsnzemcrngslk4.png?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/audi/audi-f1-adidas-dna-logo-hoodie-black_ss5_p-203336852%2Bpv-6%2Bu-fag8csejjc26lfed1lhx%2Bv-khhuwivsnzemcrngslk4.png?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "audi-adidas-track-jacket",
+    name: "Audi F1 adidas Track Jacket",
+    category: "Jackets",
+    team: "Audi",
+    driver: "Teamwear",
+    price: 12990,
+    stock: 10,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Packable Audi F1 paddock track jacket.",
+    details: "Loose fit with reflective accents and zip closure.",
+    image:
+      "https://images.footballfanatics.com/audi/audi-f1-adidas-f1-track-jacket_ss5_p-203336855%2Bpv-1%2Bu-c0yl64yxkqnkugorqrsz%2Bv-f9xqzqpqab1xodvl93ck.png?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/audi/audi-f1-adidas-f1-track-jacket_ss5_p-203336855%2Bpv-1%2Bu-c0yl64yxkqnkugorqrsz%2Bv-f9xqzqpqab1xodvl93ck.png?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "audi-2026-hulkenberg-driver-cap",
+    name: "Audi F1 2026 Nico Hulkenberg Driver Cap",
+    category: "Caps",
+    team: "Audi",
+    driver: "Nico Hulkenberg",
+    price: 3390,
+    stock: 26,
+    sizes: ["One Size"],
+    description: "Driver cap inspired by Nico Hulkenberg's 2026 kit.",
+    details: "Structured fit with sweat-wicking fabric.",
+    image:
+      "https://images.footballfanatics.com/audi/audi-f1-2026-nico-hulkenberg-driver-cap_ss5_p-203336860%2Bpv-1%2Bu-feg3eearsth9sbco73cg%2Bv-i7lyknnl9ep08pezobgh.png?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/audi/audi-f1-2026-nico-hulkenberg-driver-cap_ss5_p-203336860%2Bpv-1%2Bu-feg3eearsth9sbco73cg%2Bv-i7lyknnl9ep08pezobgh.png?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "audi-2026-engineer-tracktop-womens",
+    name: "Audi F1 2026 Engineer Tracktop - Womens",
+    category: "Jackets",
+    team: "Audi",
+    driver: "Teamwear",
+    price: 9490,
+    stock: 12,
+    sizes: ["XXS", "XS", "S", "M", "L", "XL", "2XL"],
+    description: "Audi F1 engineer tracktop with climawarm tech.",
+    details: "Doubleknit tracktop with full zip.",
+    image:
+      "https://images.footballfanatics.com/audi/audi-f1-2026-teamwear-engineer-tracktop-womens_ss5_p-203336945%2Bpv-6%2Bu-golp7ghtq5kvlt1aja0w%2Bv-ezlza85uyd6nxvgbzevf.png?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/audi/audi-f1-2026-teamwear-engineer-tracktop-womens_ss5_p-203336945%2Bpv-6%2Bu-golp7ghtq5kvlt1aja0w%2Bv-ezlza85uyd6nxvgbzevf.png?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "vcarb-2026-team-tshirt",
+    name: "VCARB Hugo 2026 Team T-Shirt",
+    category: "Shirts",
+    team: "Racing Bulls",
+    driver: "Teamwear",
+    price: 7990,
+    stock: 18,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    description: "Official VCARB 2026 team tee with sponsor graphics.",
+    details: "Crew neck with all-over team branding.",
+    image:
+      "https://images.footballfanatics.com/vcarb/vcarb-hugo-2026-team-t-shirt_ss5_p-203374210%2Bpv-1%2Bu-ncfnx9bi7cenxylgjnwh%2Bv-pkm6krkrzxl65q1ziv7i.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/vcarb/vcarb-hugo-2026-team-t-shirt_ss5_p-203374210%2Bpv-1%2Bu-ncfnx9bi7cenxylgjnwh%2Bv-pkm6krkrzxl65q1ziv7i.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "vcarb-2024-team-full-zip-hoodie",
+    name: "RB Cash App 2024 Team Full Zip Hoodie",
+    category: "Jackets",
+    team: "Racing Bulls",
+    driver: "Teamwear",
+    price: 8990,
+    stock: 12,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official 2024 team full zip hoodie.",
+    details: "Zip front with team and sponsor logos.",
+    image:
+      "https://images.footballfanatics.com/vcarb/rb-cash-app-2024-team-full-zip-hoodie_ss5_p-201289643%2Bpv-1%2Bu-u8iimfsxtqpfbes2n2uc%2Bv-cksamufg3n1uxojitos6.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/vcarb/rb-cash-app-2024-team-full-zip-hoodie_ss5_p-201289643%2Bpv-1%2Bu-u8iimfsxtqpfbes2n2uc%2Bv-cksamufg3n1uxojitos6.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "vcarb-2024-team-quarter-zip",
+    name: "RB Cash App 2024 Team 1/4 Zip Sweatshirt",
+    category: "Jackets",
+    team: "Racing Bulls",
+    driver: "Teamwear",
+    price: 7490,
+    stock: 10,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official 2024 VCARB team quarter-zip.",
+    details: "Lightweight sweatshirt with team detailing.",
+    image:
+      "https://f1store.formula1.com/content/ws/all/dc91637d-3f73-47db-ae15-22ff6eafc0a7__1440X1116.png",
+    images: [
+      "https://f1store.formula1.com/content/ws/all/dc91637d-3f73-47db-ae15-22ff6eafc0a7__1440X1116.png",
+    ],
+  },
+  {
+    id: "vcarb-fanwear-hoodie-black",
+    name: "VCARB Hugo Fanwear Hoodie - Black",
+    category: "Jackets",
+    team: "Racing Bulls",
+    driver: "Teamwear",
+    price: 8290,
+    stock: 14,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    description: "Fanwear hoodie with VCARB branding.",
+    details: "Pullover fit with sponsor graphics.",
+    image:
+      "https://images.footballfanatics.com/vcarb/vcarb-hugo-fanwear-hoodie-black_ss5_p-202284798%2Bpv-1%2Bu-11kqpxxpfgrmyqkpsguf%2Bv-dkmlglvjsq3jhbocjktu.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/vcarb/vcarb-hugo-fanwear-hoodie-black_ss5_p-202284798%2Bpv-1%2Bu-11kqpxxpfgrmyqkpsguf%2Bv-dkmlglvjsq3jhbocjktu.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "vcarb-lego-race-car",
+    name: "Visa Cash App RB VCARB 01 F1 LEGO Race Car",
+    category: "Collectibles",
+    team: "Racing Bulls",
+    driver: "Teamwear",
+    price: 2390,
+    stock: 22,
+    sizes: ["One Size"],
+    description: "LEGO Speed Champions VCARB 01 race car set.",
+    details: "Collectible F1 build for display.",
+    image:
+      "https://images.footballfanatics.com/vcarb/visa-cash-app-rb-vcarb-01-f1%C2%AE-lego%C2%AE-race-car_ss5_p-202284780%2Bpv-1%2Bu-xxr0qiz3fkgsr3krr7ho%2Bv-9bjqkurdgt7tb0usjksz.png?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/vcarb/visa-cash-app-rb-vcarb-01-f1%C2%AE-lego%C2%AE-race-car_ss5_p-202284780%2Bpv-1%2Bu-xxr0qiz3fkgsr3krr7ho%2Bv-9bjqkurdgt7tb0usjksz.png?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "haas-2026-team-overhead-hoodie",
+    name: "Haas 2026 Team Overhead Hoodie",
+    category: "Jackets",
+    team: "Haas",
+    driver: "Teamwear",
+    price: 8990,
+    stock: 14,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"],
+    description: "Official Haas 2026 team overhead hoodie.",
+    details: "Castore teamwear with sponsor branding.",
+    image:
+      "https://images.footballfanatics.com/haas-f1-team/haas-2026-team-overhead-hoodie_ss5_p-203284828%2Bpv-1%2Bu-aizddf1pbyc93skzaelg%2Bv-xzrklho4pilplh04r93q.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/haas-f1-team/haas-2026-team-overhead-hoodie_ss5_p-203284828%2Bpv-1%2Bu-aizddf1pbyc93skzaelg%2Bv-xzrklho4pilplh04r93q.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "haas-2025-team-polo",
+    name: "Haas F1 Moneygram 2025 Team Polo",
+    category: "Shirts",
+    team: "Haas",
+    driver: "Teamwear",
+    price: 6490,
+    stock: 18,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
+    description: "Official 2025 Haas team polo.",
+    details: "Team and sponsor logos with zip collar.",
+    image:
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-moneygram-2025-team-polo_ss5_p-202620507%2Bpv-1%2Bu-l8w0vusihxp29fysdkit%2Bv-t1wvzo1kxgf7kxmcjuty.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-moneygram-2025-team-polo_ss5_p-202620507%2Bpv-1%2Bu-l8w0vusihxp29fysdkit%2Bv-t1wvzo1kxgf7kxmcjuty.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "haas-2025-team-tshirt-white",
+    name: "Haas F1 Moneygram 2025 Team T-Shirt - White",
+    category: "Shirts",
+    team: "Haas",
+    driver: "Teamwear",
+    price: 5190,
+    stock: 20,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
+    description: "Official 2025 Haas team tee in white.",
+    details: "Classic crew neck with sponsor branding.",
+    image:
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-moneygram-2025-team-t-shirt-white_ss5_p-202620506%2Bu-rw62st7pcmowopuiatwq%2Bv-r9j2gyboblp8dkhran79.jpg?_hv=2&w=400",
+    images: [
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-moneygram-2025-team-t-shirt-white_ss5_p-202620506%2Bu-rw62st7pcmowopuiatwq%2Bv-r9j2gyboblp8dkhran79.jpg?_hv=2&w=400",
+    ],
+  },
+  {
+    id: "haas-2025-team-fitted-zip-sweater",
+    name: "Haas F1 Moneygram 2025 Team Fitted Zip Sweater",
+    category: "Jackets",
+    team: "Haas",
+    driver: "Teamwear",
+    price: 7990,
+    stock: 12,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
+    description: "Official 2025 fitted zip sweater in team colors.",
+    details: "Zip front with premium team styling.",
+    image:
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-moneygram-2025-team-fitted-zip-sweater_ss5_p-202620509%2Bu-aohp4vocnmkwvhnbrhno%2Bv-ko6qbisqyx9g4rqy86c1.jpg?_hv=2&w=400",
+    images: [
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-moneygram-2025-team-fitted-zip-sweater_ss5_p-202620509%2Bu-aohp4vocnmkwvhnbrhno%2Bv-ko6qbisqyx9g4rqy86c1.jpg?_hv=2&w=400",
+    ],
+  },
+  {
+    id: "haas-2026-team-trucker-cap",
+    name: "Haas F1 Team New Era Seasonal 9FORTY Trucker Cap",
+    category: "Caps",
+    team: "Haas",
+    driver: "Teamwear",
+    price: 2390,
+    stock: 26,
+    sizes: ["One Size"],
+    description: "New Era 9FORTY trucker cap for Haas fans.",
+    details: "Structured crown with mesh back panels.",
+    image:
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-team-new-era-seasonal-9forty-trucker-cap-unisex_ss5_p-203342222%2Bpv-1%2Bu-ou6sddowlcg3ja3kwjwy%2Bv-s584az5oyudrxnj2nlcs.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/haas-f1-team/haas-f1-team-new-era-seasonal-9forty-trucker-cap-unisex_ss5_p-203342222%2Bpv-1%2Bu-ou6sddowlcg3ja3kwjwy%2Bv-s584az5oyudrxnj2nlcs.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "cadillac-logo-hoodie-black",
+    name: "Cadillac Tommy Hilfiger Logo Hoodie - Black",
+    category: "Jackets",
+    team: "Cadillac",
+    driver: "Teamwear",
+    price: 10990,
+    stock: 12,
+    sizes: ["2XS", "XS", "S", "M", "L", "XL", "2XL"],
+    description: "Cadillac F1 fanwear hoodie with Tommy Hilfiger trim.",
+    details: "Pullover hoodie with Cadillac F1 branding.",
+    image:
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-hoodie-black_ss5_p-203721313%2Bpv-1%2Bu-w1szgeeudilr3m6azq2b%2Bv-w01spauwclnrkdhqhvz4.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-hoodie-black_ss5_p-203721313%2Bpv-1%2Bu-w1szgeeudilr3m6azq2b%2Bv-w01spauwclnrkdhqhvz4.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "cadillac-logo-cap-white",
+    name: "Cadillac Tommy Hilfiger Logo Cap - White",
+    category: "Caps",
+    team: "Cadillac",
+    driver: "Teamwear",
+    price: 2990,
+    stock: 28,
+    sizes: ["One Size"],
+    description: "Cadillac F1 logo cap with Tommy Hilfiger details.",
+    details: "Structured crown with adjustable strap.",
+    image:
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-cap-white-unisex_ss5_p-203721307%2Bpv-1%2Bu-euyj5p7zoibdt2of9g7h%2Bv-l6iqhl7ykytspazk3wy9.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-cap-white-unisex_ss5_p-203721307%2Bpv-1%2Bu-euyj5p7zoibdt2of9g7h%2Bv-l6iqhl7ykytspazk3wy9.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "cadillac-logo-tshirt-white",
+    name: "Cadillac Tommy Hilfiger Logo T-Shirt - White",
+    category: "Shirts",
+    team: "Cadillac",
+    driver: "Teamwear",
+    price: 5490,
+    stock: 20,
+    sizes: ["2XS", "XS", "S", "M", "L", "XL", "2XL"],
+    description: "Cadillac F1 logo tee in white.",
+    details: "Crew neck with Tommy Hilfiger branding.",
+    image:
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-t-shirt-white_ss5_p-203721312%2Bpv-1%2Bu-n0povhm4eycp6qdt3rog%2Bv-vub6bl0apdz8sccclxxt.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-t-shirt-white_ss5_p-203721312%2Bpv-1%2Bu-n0povhm4eycp6qdt3rog%2Bv-vub6bl0apdz8sccclxxt.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "cadillac-logo-polo-black",
+    name: "Cadillac Tommy Hilfiger Logo Polo - Black",
+    category: "Shirts",
+    team: "Cadillac",
+    driver: "Teamwear",
+    price: 7990,
+    stock: 16,
+    sizes: ["2XS", "XS", "S", "M", "L", "XL", "2XL"],
+    description: "Cadillac F1 logo polo with contrast trim.",
+    details: "Classic polo silhouette with team branding.",
+    image:
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-polo-black_ss5_p-203721333%2Bpv-1%2Bu-xrxsom8fzluzo5519y66%2Bv-vlgfwdfsmcm41cbrlpq7.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/cadillac-f1-team/cadillac-tommy-hilfiger-logo-polo-black_ss5_p-203721333%2Bpv-1%2Bu-xrxsom8fzluzo5519y66%2Bv-vlgfwdfsmcm41cbrlpq7.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "cadillac-2026-sergio-perez-cap-black",
+    name: "Cadillac Tommy Hilfiger 2026 Sergio Perez Team Cap - Black",
+    category: "Caps",
+    team: "Cadillac",
+    driver: "Sergio Perez",
+    price: 3290,
+    stock: 18,
+    sizes: ["One Size"],
+    description: "Driver cap for Sergio Perez 2026 Cadillac teamwear.",
+    details: "Structured fit with embroidered driver number.",
+    image:
+      "https://f1store.formula1.com/content/ws/all/bcf8e940-60fc-47b0-8295-63897a33f9ca__2000X2000.png?w=570",
+    images: [
+      "https://f1store.formula1.com/content/ws/all/bcf8e940-60fc-47b0-8295-63897a33f9ca__2000X2000.png?w=570",
+    ],
+  },
+  {
+    id: "alpine-2023-team-tshirt",
+    name: "Alpine F1 2023 Team T-Shirt",
+    category: "Shirts",
+    team: "Alpine",
+    driver: "Teamwear",
+    price: 4890,
+    stock: 18,
+    sizes: ["S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official 2023 Alpine F1 team t-shirt.",
+    details: "Team and sponsor branding with side panel detailing.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw5a12327a/images/large/701226077001_pp_01_alpinef1team.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw5a12327a/images/large/701226077001_pp_01_alpinef1team.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "alpine-2025-team-cap-9seventy",
+    name: "Alpine F1 2025 Team Cap - New Era 9SEVENTY",
+    category: "Caps",
+    team: "Alpine",
+    driver: "Teamwear",
+    price: 2990,
+    stock: 24,
+    sizes: ["One Size"],
+    description: "Official 2025 Alpine F1 team cap.",
+    details: "New Era 9SEVENTY cap with team branding.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw9d495e9a/images/large/701236999001_pp_01_alpinenewera.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw9d495e9a/images/large/701236999001_pp_01_alpinenewera.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "alpine-2024-team-cap-9forty",
+    name: "Alpine F1 2024 Team Cap - New Era 9FORTY",
+    category: "Caps",
+    team: "Alpine",
+    driver: "Teamwear",
+    price: 2690,
+    stock: 22,
+    sizes: ["One Size"],
+    description: "Official 2024 Alpine F1 team cap.",
+    details: "New Era 9FORTY cap with embroidered team logo.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwef69564f/images/large/701231121001_pp_01_alpinef1team.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwef69564f/images/large/701231121001_pp_01_alpinef1team.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "alpine-castore-full-zip-hoodie-lapis",
+    name: "Alpine F1 Team Full Zip Hoodie - Lapis Blue",
+    category: "Jackets",
+    team: "Alpine",
+    driver: "Teamwear",
+    price: 8990,
+    stock: 12,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"],
+    description: "Official Alpine F1 team full zip hoodie.",
+    details: "Replica teamwear with sponsor branding.",
+    image:
+      "https://castore.com/cdn/shop/files/TU10293-030-LAPISBLUE-01_a614cb07-59b0-4dfc-8024-0d921d3f5933.jpg?v=1738926806",
+    images: [
+      "https://castore.com/cdn/shop/files/TU10293-030-LAPISBLUE-01_a614cb07-59b0-4dfc-8024-0d921d3f5933.jpg?v=1738926806",
+    ],
+  },
+  {
+    id: "alpine-castore-mens-set-up-tshirt-navy",
+    name: "Alpine F1 Team Set Up T-Shirt - Navy",
+    category: "Shirts",
+    team: "Alpine",
+    driver: "Teamwear",
+    price: 4590,
+    stock: 20,
+    sizes: ["S", "M", "L", "XL", "2XL", "3XL", "4XL"],
+    description: "Official Alpine F1 team set up t-shirt.",
+    details: "Replica teamwear with sponsor branding.",
+    image:
+      "https://castore.com/cdn/shop/files/TM10291-020-DARKSAPPHIRE-01_3049c416-b2cd-4516-ba8a-01da3a800ae5.jpg?v=1738926648",
+    images: [
+      "https://castore.com/cdn/shop/files/TM10291-020-DARKSAPPHIRE-01_3049c416-b2cd-4516-ba8a-01da3a800ae5.jpg?v=1738926648",
+    ],
+  },
+  {
+    id: "mclaren-2025-lando-norris-driver-tee",
+    name: "McLaren 2025 Lando Norris Driver T-Shirt",
+    category: "Shirts",
+    team: "McLaren",
+    driver: "Lando Norris",
+    price: 7490,
+    stock: 18,
+    sizes: ["S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official 2025 Lando Norris driver t-shirt in papaya.",
+    details: "Driver number 4 print with team sponsor branding.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw421f5419/images/large/701235603001_pp_01_mclaren.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw421f5419/images/large/701235603001_pp_01_mclaren.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "mclaren-2025-lando-norris-driver-cap",
+    name: "McLaren 2025 Lando Norris Driver Cap",
+    category: "Caps",
+    team: "McLaren",
+    driver: "Lando Norris",
+    price: 3490,
+    stock: 24,
+    sizes: ["One Size"],
+    description: "New Era 9SEVENTY driver cap for Lando Norris.",
+    details: "Performance stretch cap with Norris detailing.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw453cd6b7/images/large/701237779001_pp_01_mclarennewera.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw453cd6b7/images/large/701237779001_pp_01_mclarennewera.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "mclaren-lando-norris-core-hoodie",
+    name: "McLaren Lando Norris Core Hoodie",
+    category: "Jackets",
+    team: "McLaren",
+    driver: "Lando Norris",
+    price: 6990,
+    stock: 14,
+    sizes: ["XXS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
+    description: "Core hoodie with LN4 graphics.",
+    details: "Regular fit hoodie with kangaroo pocket.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwc0ea01f5/images/large/701224575001_pp_01_mclaren.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwc0ea01f5/images/large/701224575001_pp_01_mclaren.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "mclaren-2021-lando-norris-9fifty-cap",
+    name: "McLaren 2021 Lando Norris 9FIFTY Cap",
+    category: "Caps",
+    team: "McLaren",
+    driver: "Lando Norris",
+    price: 2990,
+    stock: 20,
+    sizes: ["One Size"],
+    description: "Official 2021 Lando Norris driver cap.",
+    details: "New Era 9FIFTY with Norris number 4.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw13d4981b/images/large/701213211002_pp_01_mclaren-f1-team.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw13d4981b/images/large/701213211002_pp_01_mclaren-f1-team.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "oscar-piastri-81-tshirt",
+    name: "Piastri 81 T-Shirt",
+    category: "Shirts",
+    team: "McLaren",
+    driver: "Oscar Piastri",
+    price: 4890,
+    stock: 18,
+    sizes: ["S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official Oscar Piastri 81 t-shirt.",
+    details: "Race number and signature graphics.",
+    image:
+      "https://store.oscarpiastri.com/cdn/shop/files/Piastri-81-T-Shirt-front.jpg?v=1708625986&width=1400",
+    images: [
+      "https://store.oscarpiastri.com/cdn/shop/files/Piastri-81-T-Shirt-front.jpg?v=1708625986&width=1400",
+    ],
+  },
+  {
+    id: "oscar-piastri-signature-cap",
+    name: "Signature Cap - Navy",
+    category: "Caps",
+    team: "McLaren",
+    driver: "Oscar Piastri",
+    price: 2990,
+    stock: 22,
+    sizes: ["One Size"],
+    description: "Official OP81 signature cap in navy.",
+    details: "OP logo and race number 81 patches.",
+    image:
+      "https://store.oscarpiastri.com/cdn/shop/files/cap-front_614c57fb-0055-4732-8ebb-9f768e147ec2.jpg?v=1744965573&width=1400",
+    images: [
+      "https://store.oscarpiastri.com/cdn/shop/files/cap-front_614c57fb-0055-4732-8ebb-9f768e147ec2.jpg?v=1744965573&width=1400",
+    ],
+  },
+  {
+    id: "mclaren-2025-oscar-piastri-driver-cap",
+    name: "McLaren 2025 Oscar Piastri Driver Cap",
+    category: "Caps",
+    team: "McLaren",
+    driver: "Oscar Piastri",
+    price: 3490,
+    stock: 24,
+    sizes: ["One Size"],
+    description: "New Era 9SEVENTY driver cap for Oscar Piastri.",
+    details: "Performance stretch cap with Piastri detailing.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw5a928dde/images/large/701236927001_pp_01_mclarennewera.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw5a928dde/images/large/701236927001_pp_01_mclarennewera.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "mclaren-oscar-piastri-hoodie",
+    name: "McLaren Oscar Piastri Hoodie",
+    category: "Jackets",
+    team: "McLaren",
+    driver: "Oscar Piastri",
+    price: 6990,
+    stock: 14,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Oscar Piastri fan hoodie with driver branding.",
+    details: "Kangaroo pocket and team logo graphics.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwfd1d3b75/images/large/701231462002_pp_02_mclaren.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwfd1d3b75/images/large/701231462002_pp_02_mclaren.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "williams-puma-logo-tee-navy",
+    name: "Williams Racing PUMA Logo T-Shirt - Navy",
+    category: "Shirts",
+    team: "Williams",
+    driver: "Teamwear",
+    price: 3890,
+    stock: 24,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    description: "Classic Williams Racing logo tee in navy.",
+    details: "Official team branding with a regular fit.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw3eabd753/images/large/701229640001_pp_01_WilliamsRacingF1.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw3eabd753/images/large/701229640001_pp_01_WilliamsRacingF1.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "williams-puma-hoodie-navy",
+    name: "Williams Racing PUMA Hoodie - Navy",
+    category: "Jackets",
+    team: "Williams",
+    driver: "Teamwear",
+    price: 6790,
+    stock: 16,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    description: "Classic Williams Racing hoodie with team logo.",
+    details: "Soft fleece with hood and front pocket.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwb7e853ce/images/large/701227487002_pp_01_WilliamsRacingF1.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dwb7e853ce/images/large/701227487002_pp_01_WilliamsRacingF1.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "williams-puma-pitlane-jacket-blue",
+    name: "Williams Racing PUMA Pitlane Jacket - Blue",
+    category: "Jackets",
+    team: "Williams",
+    driver: "Teamwear",
+    price: 7990,
+    stock: 12,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    description: "Retro-inspired pitlane jacket in Williams blue.",
+    details: "Nylon shell with team branding and piping.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw56a53d8a/images/large/701231842001_pp_01_pumawilliams.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw56a53d8a/images/large/701231842001_pp_01_pumawilliams.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "williams-puma-w-cap-navy",
+    name: "Williams Racing PUMA W Cap - Navy",
+    category: "Caps",
+    team: "Williams",
+    driver: "Teamwear",
+    price: 2190,
+    stock: 30,
+    sizes: ["One Size"],
+    description: "Williams Racing W logo cap in navy.",
+    details: "Adjustable snapback with embroidered crest.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw943ceb01/images/large/701227498001_pp_01_WilliamsRacingF1.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw943ceb01/images/large/701227498001_pp_01_WilliamsRacingF1.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "aston-martin-graphic-hoodie-black",
+    name: "Aston Martin F1 Team Graphic Hoodie - Black",
+    category: "Jackets",
+    team: "Aston Martin",
+    driver: "Teamwear",
+    price: 7990,
+    stock: 14,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL"],
+    description: "Graphic hoodie with Aston Martin F1 wordmark.",
+    details: "Relaxed fit with rear graphic print.",
+    image:
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw044d7113/images/large/701232501001_pp_01_astonmartin.jpg?sh=800&sm=fit&sw=800",
+    images: [
+      "https://www.fuelforfans.com/dw/image/v2/BDWJ_PRD/on/demandware.static/-/Sites-master-catalog/default/dw044d7113/images/large/701232501001_pp_01_astonmartin.jpg?sh=800&sm=fit&sw=800",
+    ],
+  },
+  {
+    id: "aston-martin-2026-team-tshirt",
+    name: "Aston Martin F1 2026 Team T-Shirt",
+    category: "Shirts",
+    team: "Aston Martin",
+    driver: "Teamwear",
+    price: 8990,
+    stock: 16,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official Aston Martin F1 2026 team replica tee.",
+    details: "Team and sponsor branding with performance fit.",
+    image:
+      "https://images.footballfanatics.com/aston-martin/aston-martin-f1-aramco-cognizant-f1-2026-team-t-shirt_ss5_p-203336997+pv-1+u-fyrnnxhum4ruyb0ovqts+v-q9z9nflkfl4aubdmurrr.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/aston-martin/aston-martin-f1-aramco-cognizant-f1-2026-team-t-shirt_ss5_p-203336997+pv-1+u-fyrnnxhum4ruyb0ovqts+v-q9z9nflkfl4aubdmurrr.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "aston-martin-2025-team-driver-hoodie",
+    name: "Aston Martin F1 2025 Team Driver Hoodie",
+    category: "Jackets",
+    team: "Aston Martin",
+    driver: "Teamwear",
+    price: 10990,
+    stock: 10,
+    sizes: ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official 2025 Aston Martin team driver hoodie.",
+    details: "Replica teamwear with sponsor branding.",
+    image:
+      "https://images.footballfanatics.com/aston-martin/aston-martin-aramco-cognizant-f1-2025-team-driver-hoodie_ss5_p-202359055+pv-1+u-spuryzpjhhbcakfhzgyf+v-snx4o365sp3vfckfxtww.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/aston-martin/aston-martin-aramco-cognizant-f1-2025-team-driver-hoodie_ss5_p-202359055+pv-1+u-spuryzpjhhbcakfhzgyf+v-snx4o365sp3vfckfxtww.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "aston-martin-2024-team-driver-hoodie",
+    name: "Aston Martin F1 2024 Team Driver Hoodie",
+    category: "Jackets",
+    team: "Aston Martin",
+    driver: "Teamwear",
+    price: 9990,
+    stock: 10,
+    sizes: ["2XS", "XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Official 2024 Aston Martin team driver hoodie.",
+    details: "Replica teamwear with sponsor graphics.",
+    image:
+      "https://images.footballfanatics.com/aston-martin/aston-martin-aramco-f1-2024-team-driver-hoodie_ss5_p-200838313+pv-1+u-jqcrgxpgi6vrftk2vfr0+v-6xel5z5tet4h9ksg7fw8.jpg?_hv=2&w=1018",
+    images: [
+      "https://images.footballfanatics.com/aston-martin/aston-martin-aramco-f1-2024-team-driver-hoodie_ss5_p-200838313+pv-1+u-jqcrgxpgi6vrftk2vfr0+v-6xel5z5tet4h9ksg7fw8.jpg?_hv=2&w=1018",
+    ],
+  },
+  {
+    id: "aston-martin-2025-team-cap-black",
+    name: "Aston Martin F1 2025 Team Cap - Black",
+    category: "Caps",
+    team: "Aston Martin",
+    driver: "Teamwear",
+    price: 2990,
+    stock: 28,
+    sizes: ["One Size"],
+    description: "Official 2025 Aston Martin team cap in black.",
+    details: "Structured fit with curved bill and team crest.",
+    image:
+      "https://images.footballfanatics.com/aston-martin/aston-martin-aramco-cognizant-f1-2025-team-cap-black_ss5_p-202359042+pv-1+u-mpfmaf9z4jn9uompjlaz+v-i8ahlgumme1eh4wonzob.jpg?_hv=2&w=900",
+    images: [
+      "https://images.footballfanatics.com/aston-martin/aston-martin-aramco-cognizant-f1-2025-team-cap-black_ss5_p-202359042+pv-1+u-mpfmaf9z4jn9uompjlaz+v-i8ahlgumme1eh4wonzob.jpg?_hv=2&w=900",
+    ],
+  },
+  {
+    id: "men-paddock-polo-black",
+    name: "Men Paddock Polo - Black",
+    category: "Men",
+    team: "Formula 1",
+    driver: "Teamwear",
+    price: 4290,
+    stock: 28,
+    sizes: ["S", "M", "L", "XL", "2XL", "3XL"],
+    description: "Classic men's paddock polo with tonal branding.",
+    details: "Moisture-wicking fabric, three-button placket.",
+    image: createProductImage("Men Polo", "#0f1115", "#ff1e1e"),
+    images: [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1521579971123-119293fd7d30?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "men-grid-hoodie-charcoal",
+    name: "Men Grid Hoodie - Charcoal",
+    category: "Men",
+    team: "Red Bull",
+    driver: "Teamwear",
+    price: 5890,
+    stock: 20,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    description: "Soft fleece hoodie with bold gridline print.",
+    details: "Brushed interior, ribbed cuffs, kangaroo pocket.",
+    image: createProductImage("Men Hoodie", "#1a1a1a", "#ffd100"),
+    images: [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1521579971123-119293fd7d30?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "men-team-crewneck-sweat",
+    name: "Men Team Crewneck Sweat",
+    category: "Men",
+    team: "Mercedes",
+    driver: "Teamwear",
+    price: 5390,
+    stock: 18,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    description: "Crewneck sweat with understated team crest.",
+    details: "Midweight fleece, reinforced collar, soft hand feel.",
+    image: createProductImage("Crewneck", "#101820", "#00d2be"),
+    images: [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1521579971123-119293fd7d30?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "men-performance-track-shorts",
+    name: "Men Performance Track Shorts",
+    category: "Men",
+    team: "McLaren",
+    driver: "Teamwear",
+    price: 3590,
+    stock: 24,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    description: "Lightweight track shorts for race-day comfort.",
+    details: "Quick-dry fabric, zip pockets, drawcord waist.",
+    image: createProductImage("Track Shorts", "#1f130b", "#ff8a00"),
+    images: [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1521579971123-119293fd7d30?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "men-race-day-shell-jacket",
+    name: "Men Race Day Shell Jacket",
+    category: "Men",
+    team: "Ferrari",
+    driver: "Teamwear",
+    price: 7890,
+    stock: 12,
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    description: "Weather-ready shell jacket with race detailing.",
+    details: "Packable hood, taped seams, adjustable cuffs.",
+    image: createProductImage("Shell Jacket", "#2b0a0a", "#ff4d4d"),
+    images: [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1521579971123-119293fd7d30?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "women-sleeveless-polo-sky",
+    name: "Women Sleeveless Polo - Sky",
+    category: "Women",
+    team: "Williams",
+    driver: "Teamwear",
+    price: 3690,
+    stock: 20,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    description: "Sleeveless polo with clean paddock styling.",
+    details: "Light stretch fabric, taped placket, breathable weave.",
+    image: createProductImage("Women Polo", "#d9ecff", "#3b82f6"),
+    images: [
+      "https://images.unsplash.com/photo-1508853363419-a9263d752c59?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1565012355505-9cefe58e4fd3?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.0.3&q=60&w=3000",
+      "https://images.unsplash.com/photo-1615957500739-f68f9d53525a?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "kids-race-day-backpack",
+    name: "Kids Race Day Backpack",
+    category: "Kids",
+    team: "Formula 1",
+    driver: "Teamwear",
+    price: 2590,
+    stock: 24,
+    sizes: ["One Size"],
+    description: "Compact backpack for young fans on the go.",
+    details: "Padded straps, front organizer pocket, durable canvas.",
+    image: createProductImage("Kids Pack", "#202b2f", "#ffb703"),
+    images: [
+      "https://images.unsplash.com/photo-1558140275-6b7b7bf2cfa1?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1566845983206-173d95ecc597?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1583249483442-c665ed9c21da?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "headwear-trackside-beanie",
+    name: "Trackside Beanie",
+    category: "Headwear",
+    team: "Mercedes",
+    driver: "Teamwear",
+    price: 1890,
+    stock: 22,
+    sizes: ["One Size"],
+    description: "Rib-knit beanie for cool race mornings.",
+    details: "Fold-over cuff, soft yarn, tonal crest.",
+    image: createProductImage("Beanie", "#11161c", "#00d2be"),
+    images: [
+      "https://images.unsplash.com/photo-1723797447445-a7a81aa8078a?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1627733041826-77dd65dc5a19?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1510681217935-5bc73636d974?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "headwear-classic-visor",
+    name: "Classic Track Visor",
+    category: "Headwear",
+    team: "Ferrari",
+    driver: "Teamwear",
+    price: 1690,
+    stock: 20,
+    sizes: ["One Size"],
+    description: "Lightweight visor for sunny grandstands.",
+    details: "Curved brim, moisture-wicking band, adjustable strap.",
+    image: createProductImage("Track Visor", "#7a0000", "#ffcc5c"),
+    images: [
+      "https://images.unsplash.com/photo-1723797447445-a7a81aa8078a?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1627733041826-77dd65dc5a19?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1510681217935-5bc73636d974?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "accessory-trackside-travel-mug",
+    name: "Trackside Travel Mug",
+    category: "Accessories",
+    team: "Formula 1",
+    driver: "Teamwear",
+    price: 1490,
+    stock: 34,
+    sizes: ["One Size"],
+    description: "Insulated travel mug for early starts.",
+    details: "Double-wall steel, flip lid, fits standard cupholders.",
+    image: createProductImage("Travel Mug", "#1a1f2b", "#ff4d4d"),
+    images: [
+      "https://images.unsplash.com/photo-1760624294699-3d3156314391?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1618677366787-9727aacca7ea?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/flagged/photo-1557599365-977bd4eecc4d?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    ],
+  },
+  {
+    id: "collectible-gridone-keychain",
+    name: "GridOne Metal Keychain",
+    category: "Collectibles",
+    team: "Formula 1",
+    driver: "Teamwear",
+    price: 790,
+    stock: 40,
+    sizes: ["One Size"],
+    description: "Metal keychain with GridOne badge.",
+    details: "Brushed finish, enamel inlay, sturdy ring.",
+    image: createProductImage("Keychain", "#121620", "#ffb703"),
+    images: [
+      "https://images.unsplash.com/photo-1511415518647-9e5da4fd803f?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1667463439450-7d85f50426ea?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+      "https://images.unsplash.com/photo-1511453650475-ca175d4aede0?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.0.3&q=60&w=3000",
+    ],
+  },
 ];
 
-export const STORE_PRODUCTS = RAW_STORE_PRODUCTS.map((product) => {
+const AUTO_PRODUCT_IMAGE_SETS = {
+  Accessories: [
+    "https://images.unsplash.com/photo-1760624294699-3d3156314391?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    "https://images.unsplash.com/photo-1618677366787-9727aacca7ea?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    "https://images.unsplash.com/flagged/photo-1557599365-977bd4eecc4d?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+  ],
+  Collectibles: [
+    "https://images.unsplash.com/photo-1511415518647-9e5da4fd803f?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    "https://images.unsplash.com/photo-1667463439450-7d85f50426ea?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000",
+    "https://images.unsplash.com/photo-1511453650475-ca175d4aede0?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.0.3&q=60&w=3000",
+  ],
+};
+
+const AUTO_PRODUCT_PALETTES = [
+  ["#1a1f2b", "#ff4d4d"],
+  ["#0f1115", "#ffd100"],
+  ["#101820", "#00d2be"],
+  ["#20160c", "#ff8a00"],
+  ["#2b0a0a", "#ff6b6b"],
+];
+
+const toSlug = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const ensureMinimumStoreProducts = (sourceProducts, { teams, drivers, minPer }) => {
+  const products = Array.isArray(sourceProducts) ? [...sourceProducts] : [];
+  const teamCounts = new Map();
+  const driverCounts = new Map();
+
+  products.forEach((product) => {
+    if (product?.team && teams.includes(product.team)) {
+      teamCounts.set(product.team, (teamCounts.get(product.team) || 0) + 1);
+    }
+    if (product?.driver && drivers.includes(product.driver)) {
+      driverCounts.set(product.driver, (driverCounts.get(product.driver) || 0) + 1);
+    }
+  });
+
+  const buildAutoProduct = ({
+    idPrefix,
+    namePrefix,
+    category,
+    team,
+    driver,
+    index,
+  }) => {
+    const palette = AUTO_PRODUCT_PALETTES[index % AUTO_PRODUCT_PALETTES.length];
+    const title = `${namePrefix} ${index + 1}`;
+    const image = createProductImage(title, palette[0], palette[1]);
+    const images = AUTO_PRODUCT_IMAGE_SETS[category] || [image];
+    return {
+      id: `${idPrefix}-${index + 1}`,
+      name: `${namePrefix} ${index + 1}`,
+      category,
+      team,
+      driver,
+      price: 1490 + index * 210,
+      stock: 18 + (index % 5) * 4,
+      sizes: ["One Size"],
+      description: "Auto-generated item to complete the catalog.",
+      details: "Limited run with premium finish.",
+      image,
+      images,
+    };
+  };
+
+  teams.forEach((team) => {
+    const current = teamCounts.get(team) || 0;
+    const needed = Math.max(0, minPer - current);
+    for (let i = 0; i < needed; i += 1) {
+      const slug = toSlug(team);
+      products.push(
+        buildAutoProduct({
+          idPrefix: `auto-team-${slug}`,
+          namePrefix: `${team} Team Essentials`,
+          category: "Accessories",
+          team,
+          driver: "Teamwear",
+          index: i,
+        })
+      );
+    }
+  });
+
+  drivers.forEach((driver) => {
+    const current = driverCounts.get(driver) || 0;
+    const needed = Math.max(0, minPer - current);
+    for (let i = 0; i < needed; i += 1) {
+      const slug = toSlug(driver);
+      products.push(
+        buildAutoProduct({
+          idPrefix: `auto-driver-${slug}`,
+          namePrefix: `${driver} Fan Collectible`,
+          category: "Collectibles",
+          team: "Formula 1",
+          driver,
+          index: i,
+        })
+      );
+    }
+  });
+
+  return products;
+};
+
+const SEEDED_STORE_PRODUCTS = ensureMinimumStoreProducts(RAW_STORE_PRODUCTS, {
+  teams: STORE_TEAMS.filter((team) => team !== "All Teams"),
+  drivers: STORE_DRIVERS.filter((driver) => driver !== "All Drivers"),
+  minPer: 5,
+});
+
+export const STORE_PRODUCTS = SEEDED_STORE_PRODUCTS.map((product) => {
   const baseImages = Array.isArray(product.images) ? product.images : [];
   const images = baseImages.length > 0 ? baseImages : product.image ? [product.image] : [];
   return {

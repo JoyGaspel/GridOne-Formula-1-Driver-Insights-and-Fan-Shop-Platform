@@ -1,18 +1,29 @@
-const API_BASE = "https://psgc.gitlab.io/api";
+const DATA_BASE = "/psgc";
 
 const regionsCache = { value: null };
 const provincesCache = new Map();
 const localitiesCache = new Map();
 const barangaysCache = new Map();
+const dataCache = {
+  regions: null,
+  provinces: null,
+  localities: null,
+  barangaysByCity: null,
+};
 
-async function fetchJson(path) {
-  const response = await fetch(`${API_BASE}${path}`);
+async function loadJson(name) {
+  if (dataCache[name]) {
+    return dataCache[name];
+  }
+
+  const response = await fetch(`${DATA_BASE}/${name}.json`);
   if (!response.ok) {
     throw new Error(`Location lookup failed: ${response.status}`);
   }
 
   const data = await response.json();
-  return Array.isArray(data) ? data : [];
+  dataCache[name] = data;
+  return data;
 }
 
 function normalizeName(value) {
@@ -24,14 +35,8 @@ export async function fetchRegions() {
     return regionsCache.value;
   }
 
-  const rows = await fetchJson("/regions/");
-  const normalized = rows
-    .map((row) => ({
-      code: String(row.code || ""),
-      name: normalizeName(row.name),
-    }))
-    .filter((row) => row.code && row.name)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const rows = await loadJson("regions");
+  const normalized = Array.isArray(rows) ? rows : [];
 
   regionsCache.value = normalized;
   return normalized;
@@ -47,14 +52,14 @@ export async function fetchProvinces(regionCode) {
     return provincesCache.get(safeRegionCode);
   }
 
-  const rows = await fetchJson(`/regions/${safeRegionCode}/provinces/`);
-  const normalized = rows
+  const rows = await loadJson("provinces");
+  const normalized = (Array.isArray(rows) ? rows : [])
+    .filter((row) => String(row.regionCode || "").trim() === safeRegionCode)
     .map((row) => ({
       code: String(row.code || ""),
       name: normalizeName(row.name),
     }))
-    .filter((row) => row.code && row.name)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .filter((row) => row.code && row.name);
 
   provincesCache.set(safeRegionCode, normalized);
   return normalized;
@@ -69,24 +74,24 @@ export async function fetchLocalities({ regionCode, provinceCode }) {
     return localitiesCache.get(cacheKey);
   }
 
-  let rows = [];
-
-  if (safeProvinceCode) {
-    rows = await fetchJson(`/provinces/${safeProvinceCode}/cities-municipalities/`);
-  } else if (safeRegionCode) {
-    rows = await fetchJson(`/regions/${safeRegionCode}/cities-municipalities/`);
-  } else {
+  if (!safeRegionCode) {
     return [];
   }
 
-  const normalized = rows
+  const rows = await loadJson("localities");
+  const normalized = (Array.isArray(rows) ? rows : [])
+    .filter((row) => {
+      if (safeProvinceCode) {
+        return String(row.provinceCode || "").trim() === safeProvinceCode;
+      }
+      return String(row.regionCode || "").trim() === safeRegionCode;
+    })
     .map((row) => ({
       code: String(row.code || ""),
       name: normalizeName(row.name),
-      postalCode: String(row.zip_code || row.oldZipCode || "").trim(),
+      postalCode: String(row.postalCode || "").trim(),
     }))
-    .filter((row) => row.code && row.name)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .filter((row) => row.code && row.name);
 
   localitiesCache.set(cacheKey, normalized);
   return normalized;
@@ -102,9 +107,10 @@ export async function fetchBarangays(localityCode) {
     return barangaysCache.get(safeLocalityCode);
   }
 
-  const rows = await fetchJson(`/cities-municipalities/${safeLocalityCode}/barangays/`);
-  const normalized = rows
-    .map((row) => normalizeName(row.name))
+  const rows = await loadJson("barangays-by-city");
+  const list = rows && typeof rows === "object" ? rows[safeLocalityCode] : [];
+  const normalized = (Array.isArray(list) ? list : [])
+    .map((row) => normalizeName(row))
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
 

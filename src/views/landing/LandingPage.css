@@ -549,6 +549,21 @@
   }
 }
 
+@media (max-width: 520px) {
+  .landing-hero {
+    padding: 0.9rem 0.7rem 0.7rem;
+    border-radius: 16px;
+  }
+
+  .landing-hero-title {
+    font-size: clamp(1.7rem, 9vw, 2.6rem);
+  }
+
+  .landing-hero-subtitle {
+    font-size: 0.88rem;
+  }
+}
+
 
 @media (max-width: 1024px) {
   .cards-drivers {

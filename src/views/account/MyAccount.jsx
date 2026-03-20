@@ -26,7 +26,10 @@ import "./MyAccount.css";
 
 const ROLE_KEY = "gridone_session_role";
 const ORDER_KEY = "gridone_store_orders_v1";
+const CART_KEY = "gridone_store_cart_v1";
+const CART_KEY_LEGACY = "gridone_cart";
 const ORDERS_TABLE = "store_orders";
+const CART_TABLE = "store_cart_items";
 
 const parseArray = (value) => {
   try {
@@ -36,6 +39,12 @@ const parseArray = (value) => {
     return [];
   }
 };
+
+const sumCartQuantity = (items) =>
+  (Array.isArray(items) ? items : []).reduce(
+    (sum, item) => sum + Number(item?.quantity || 0),
+    0,
+  );
 
 const getStatusTone = (value) => {
   const normalized = String(value || "").trim().toLowerCase();
@@ -133,8 +142,9 @@ export default function MyAccount() {
   const [address, setAddress] = useState(emptyAddress);
   const [addresses, setAddresses] = useState([]);
   const [activeAddressId, setActiveAddressId] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
   const [orders, setOrders] = useState([]);
+  const [ordersCount, setOrdersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
@@ -184,8 +194,12 @@ export default function MyAccount() {
       setRole(resolvedRole);
       setDisplayName(nameFromMeta);
       setNewEmail(currentUser.email || "");
-      setCartItems(parseArray(localStorage.getItem("gridone_cart")));
+      const primaryCart = parseArray(localStorage.getItem(CART_KEY));
+      const legacyCart = parseArray(localStorage.getItem(CART_KEY_LEGACY));
+      const cachedCart = primaryCart.length > 0 ? primaryCart : legacyCart;
+      setCartCount(sumCartQuantity(cachedCart));
       setOrders(parseArray(localStorage.getItem(ORDER_KEY)));
+      setOrdersCount(parseArray(localStorage.getItem(ORDER_KEY)).length);
 
       const storedAddresses = parseStoredAddresses(localStorage.getItem(ADDRESS_LIST_KEY));
       const legacyAddress = parseStoredAddress(localStorage.getItem(ADDRESS_KEY));
@@ -200,16 +214,24 @@ export default function MyAccount() {
 
       if (resolvedRole !== "admin") {
         setOrdersLoading(true);
-        const { data: addressRows, error: addressError } = await supabase
-          .from(ADDRESS_TABLE)
-          .select("*")
-          .eq("user_id", currentUser.id);
-
-        const { data: orderRows, error: ordersError } = await supabase
-          .from(ORDERS_TABLE)
-          .select("*")
-          .eq("user_id", currentUser.id)
-          .order("created_at", { ascending: false });
+        const [
+          { data: addressRows, error: addressError },
+          { data: orderRows, error: ordersError },
+          { count: orderCount, error: ordersCountError },
+          { data: cartRows, error: cartError },
+        ] = await Promise.all([
+          supabase.from(ADDRESS_TABLE).select("*").eq("user_id", currentUser.id),
+          supabase
+            .from(ORDERS_TABLE)
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from(ORDERS_TABLE)
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", currentUser.id),
+          supabase.from(CART_TABLE).select("quantity").eq("user_id", currentUser.id),
+        ]);
 
         if (!addressError && Array.isArray(addressRows)) {
           const dbAddresses = normalizeAddressList(
@@ -230,6 +252,16 @@ export default function MyAccount() {
           const nextOrders = orderRows.map(mapDbOrderRow).filter(Boolean);
           setOrders(nextOrders);
           localStorage.setItem(ORDER_KEY, JSON.stringify(nextOrders));
+        }
+
+        if (!ordersCountError && typeof orderCount === "number") {
+          setOrdersCount(orderCount);
+        } else if (!ordersError && Array.isArray(orderRows)) {
+          setOrdersCount(orderRows.length);
+        }
+
+        if (!cartError && Array.isArray(cartRows)) {
+          setCartCount(sumCartQuantity(cartRows));
         }
 
         setOrdersLoading(false);
@@ -1450,11 +1482,11 @@ export default function MyAccount() {
                   </div>
                   <div className="account-summary-block">
                     <p className="account-summary-label">Saved orders</p>
-                    <p className="account-summary-value">{orders.length}</p>
+                    <p className="account-summary-value">{ordersCount}</p>
                   </div>
                   <div className="account-summary-block">
                     <p className="account-summary-label">Cart items</p>
-                    <p className="account-summary-value">{cartItems.length}</p>
+                    <p className="account-summary-value">{cartCount}</p>
                   </div>
                   <div className="account-summary-block">
                     <p className="account-summary-label">Account type</p>
@@ -1463,7 +1495,7 @@ export default function MyAccount() {
                   <div className="account-summary-block">
                     <p className="account-summary-label">Default address</p>
                     <p className="account-summary-value">
-                      {defaultAddress?.streetAddress && defaultAddress?.isDefault ? "Saved" : "Not set"}
+                      {defaultAddress?.streetAddress ? formatAddressLine(defaultAddress) : "Not set"}
                     </p>
                   </div>
                   <div className="account-summary-block">

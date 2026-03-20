@@ -20,6 +20,14 @@ body {
   overflow-x: hidden;
 }
 
+#root,
+.app-shell,
+.app-shell-main,
+.app-route-fade {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 .app-shell {
   min-height: 100vh;
   display: flex;

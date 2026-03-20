@@ -204,3 +204,62 @@
     bottom: 0.88rem;
   }
 }
+
+@media (max-width: 520px) {
+  .driver-card,
+  .driver-layout {
+    min-height: 248px;
+  }
+
+  .driver-copy {
+    left: 0.85rem;
+    top: 0.75rem;
+    max-width: 54%;
+  }
+
+  .driver-name {
+    font-size: 1.45rem;
+  }
+
+  .driver-team {
+    font-size: 0.85rem;
+  }
+
+  .driver-number {
+    margin-top: 0.7rem;
+    font-size: 2.5rem;
+  }
+
+  .driver-image {
+    width: 44%;
+    min-width: 160px;
+  }
+
+  .driver-photo {
+    right: -6%;
+    width: min(120%, 300px);
+  }
+
+  .driver-flag {
+    left: 0.85rem;
+    bottom: 0.75rem;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (orientation: portrait) {
+  .driver-card,
+  .driver-layout {
+    min-height: 240px;
+  }
+
+  .driver-copy {
+    max-width: 58%;
+  }
+
+  .driver-image {
+    width: 42%;
+    min-width: 150px;
+  }
+}
