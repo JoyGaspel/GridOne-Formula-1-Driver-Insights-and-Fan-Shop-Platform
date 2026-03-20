@@ -50,7 +50,7 @@ export const STORE_DRIVERS = [
   "Lance Stroll",
   "Nico Hulkenberg",
   "Gabriel Bortoleto",
-  "Arvin Lindblad",
+  "Arvid Lindblad",
   "Liam Lawson",
   "Oliver Bearman",
   "Esteban Ocon",
@@ -59,6 +59,45 @@ export const STORE_DRIVERS = [
   "Valtteri Bottas",
   "Sergio Perez",
 ];
+
+const TEAM_ID_TO_STORE_NAME = {
+  red_bull: "Red Bull",
+  ferrari: "Ferrari",
+  mercedes: "Mercedes",
+  mclaren: "McLaren",
+  aston_martin: "Aston Martin",
+  alpine: "Alpine",
+  williams: "Williams",
+  rb: "Racing Bulls",
+  audi: "Audi",
+  haas: "Haas",
+  cadillac: "Cadillac",
+};
+
+const DRIVER_TEAM_MAP = {
+  "George Russell": TEAM_ID_TO_STORE_NAME.mercedes,
+  "Andrea Kimi Antonelli": TEAM_ID_TO_STORE_NAME.mercedes,
+  "Charles Leclerc": TEAM_ID_TO_STORE_NAME.ferrari,
+  "Lewis Hamilton": TEAM_ID_TO_STORE_NAME.ferrari,
+  "Oliver Bearman": TEAM_ID_TO_STORE_NAME.haas,
+  "Lando Norris": TEAM_ID_TO_STORE_NAME.mclaren,
+  "Pierre Gasly": TEAM_ID_TO_STORE_NAME.alpine,
+  "Max Verstappen": TEAM_ID_TO_STORE_NAME.red_bull,
+  "Liam Lawson": TEAM_ID_TO_STORE_NAME.rb,
+  "Arvid Lindblad": TEAM_ID_TO_STORE_NAME.rb,
+  "Isack Hadjar": TEAM_ID_TO_STORE_NAME.red_bull,
+  "Oscar Piastri": TEAM_ID_TO_STORE_NAME.mclaren,
+  "Carlos Sainz": TEAM_ID_TO_STORE_NAME.williams,
+  "Gabriel Bortoleto": TEAM_ID_TO_STORE_NAME.audi,
+  "Franco Colapinto": TEAM_ID_TO_STORE_NAME.alpine,
+  "Esteban Ocon": TEAM_ID_TO_STORE_NAME.haas,
+  "Nico Hulkenberg": TEAM_ID_TO_STORE_NAME.audi,
+  "Alex Albon": TEAM_ID_TO_STORE_NAME.williams,
+  "Valtteri Bottas": TEAM_ID_TO_STORE_NAME.cadillac,
+  "Sergio Perez": TEAM_ID_TO_STORE_NAME.cadillac,
+  "Fernando Alonso": TEAM_ID_TO_STORE_NAME.aston_martin,
+  "Lance Stroll": TEAM_ID_TO_STORE_NAME.aston_martin,
+};
 
 const RAW_STORE_PRODUCTS = [
   {
@@ -1704,11 +1743,124 @@ const AUTO_PRODUCT_PALETTES = [
   ["#2b0a0a", "#ff6b6b"],
 ];
 
+const normalizeStoreValue = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
 const toSlug = (value) =>
   String(value || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+
+const normalizeProductName = (value) =>
+  String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const resolveTeamFromText = (value) => {
+  const text = normalizeStoreValue(value);
+  if (!text) {
+    return "";
+  }
+
+  if (text.includes("red bull") || text.includes("oracle red bull")) {
+    return TEAM_ID_TO_STORE_NAME.red_bull;
+  }
+  if (text.includes("ferrari") || text.includes("scuderia")) {
+    return TEAM_ID_TO_STORE_NAME.ferrari;
+  }
+  if (text.includes("mercedes") || text.includes("amg") || text.includes("petronas")) {
+    return TEAM_ID_TO_STORE_NAME.mercedes;
+  }
+  if (text.includes("mclaren")) {
+    return TEAM_ID_TO_STORE_NAME.mclaren;
+  }
+  if (text.includes("aston martin") || text.includes("aramco") || text.includes("cognizant")) {
+    return TEAM_ID_TO_STORE_NAME.aston_martin;
+  }
+  if (text.includes("williams")) {
+    return TEAM_ID_TO_STORE_NAME.williams;
+  }
+  if (text.includes("audi")) {
+    return TEAM_ID_TO_STORE_NAME.audi;
+  }
+  if (text.includes("haas")) {
+    return TEAM_ID_TO_STORE_NAME.haas;
+  }
+  if (text.includes("alpine")) {
+    return TEAM_ID_TO_STORE_NAME.alpine;
+  }
+  if (text.includes("cadillac")) {
+    return TEAM_ID_TO_STORE_NAME.cadillac;
+  }
+  if (
+    text.includes("racing bulls") ||
+    text.includes("visa cash app") ||
+    /\brb\b/.test(text)
+  ) {
+    return TEAM_ID_TO_STORE_NAME.rb;
+  }
+  if (text.includes("kick sauber") || text.includes("sauber") || text.includes("alfa romeo")) {
+    return TEAM_ID_TO_STORE_NAME.audi;
+  }
+
+  return "";
+};
+
+const normalizeStoreCategory = (value) => {
+  const raw = normalizeStoreValue(value);
+  if (!raw) {
+    return "Collectibles";
+  }
+  if (raw === "men" || raw === "shirts" || raw === "jackets") {
+    return "Men";
+  }
+  if (raw === "women") {
+    return "Women";
+  }
+  if (raw === "kids") {
+    return "Kids";
+  }
+  if (raw === "headwear" || raw === "caps") {
+    return "Headwear";
+  }
+  if (raw === "accessories" || raw === "gifts & accessories") {
+    return "Accessories";
+  }
+  if (raw === "collectibles") {
+    return "Collectibles";
+  }
+  return "Collectibles";
+};
+
+const resolveStoreTeam = (product) => {
+  const rawTeam = String(product?.team || "").trim();
+  const normalizedTeam = normalizeStoreValue(rawTeam);
+  if (normalizedTeam) {
+    const match = STORE_TEAMS.find(
+      (team) => normalizeStoreValue(team) === normalizedTeam && team !== "All Teams"
+    );
+    if (match) {
+      return match;
+    }
+  }
+
+  const driverTeam = DRIVER_TEAM_MAP[product?.driver];
+  if (driverTeam) {
+    return driverTeam;
+  }
+
+  const nameMatch = resolveTeamFromText(product?.name);
+  if (nameMatch) {
+    return nameMatch;
+  }
+
+  return "All Teams";
+};
 
 const ensureMinimumStoreProducts = (sourceProducts, { teams, drivers, minPer }) => {
   const products = Array.isArray(sourceProducts) ? [...sourceProducts] : [];
@@ -1775,12 +1927,13 @@ const ensureMinimumStoreProducts = (sourceProducts, { teams, drivers, minPer }) 
     const needed = Math.max(0, minPer - current);
     for (let i = 0; i < needed; i += 1) {
       const slug = toSlug(driver);
+      const driverTeam = DRIVER_TEAM_MAP[driver] || "All Teams";
       products.push(
         buildAutoProduct({
           idPrefix: `auto-driver-${slug}`,
           namePrefix: `${driver} Fan Collectible`,
           category: "Collectibles",
-          team: "Formula 1",
+          team: driverTeam,
           driver,
           index: i,
         })
@@ -1794,14 +1947,20 @@ const ensureMinimumStoreProducts = (sourceProducts, { teams, drivers, minPer }) 
 const SEEDED_STORE_PRODUCTS = ensureMinimumStoreProducts(RAW_STORE_PRODUCTS, {
   teams: STORE_TEAMS.filter((team) => team !== "All Teams"),
   drivers: STORE_DRIVERS.filter((driver) => driver !== "All Drivers"),
-  minPer: 5,
+  minPer: 0,
 });
 
 export const STORE_PRODUCTS = SEEDED_STORE_PRODUCTS.map((product) => {
   const baseImages = Array.isArray(product.images) ? product.images : [];
   const images = baseImages.length > 0 ? baseImages : product.image ? [product.image] : [];
+  const normalizedCategory = normalizeStoreCategory(product.category);
+  const normalizedName = normalizeProductName(product.name);
+  const normalizedTeam = resolveStoreTeam({ ...product, category: normalizedCategory });
   return {
     ...product,
+    name: normalizedName,
+    category: normalizedCategory,
+    team: normalizedTeam,
     images,
   };
 });

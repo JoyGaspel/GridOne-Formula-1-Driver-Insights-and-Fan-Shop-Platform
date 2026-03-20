@@ -13,12 +13,34 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [emailForVerification, setEmailForVerification] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   /* ---------------- VALIDATIONS ---------------- */
-  const validateName = (name) => /^[A-Za-z]{2,25}$/.test(name);
-  const validateEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|io|co)$/i.test(email);
-  const validatePassword = (password) => /^.{8,}$/.test(password);
+  const validateName = (name) =>
+    /^[A-Za-z][A-Za-z .-]{0,28}[A-Za-z]$/.test(name);
+  const validateEmail = (value) =>
+    /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|io|co)$/i.test(value);
+  const getPasswordRules = (value) => ({
+    length: value.length >= 8,
+    upper: /[A-Z]/.test(value),
+    lower: /[a-z]/.test(value),
+    number: /[0-9]/.test(value),
+    special: /[!@#\^$*&()\-_=+]/.test(value),
+  });
+  const validatePassword = (value) => {
+    const rules = getPasswordRules(value);
+    return Object.values(rules).every(Boolean);
+  };
+  const isFirstNameValid = validateName(firstName.trim());
+  const isLastNameValid = validateName(lastName.trim());
+  const isEmailValid = validateEmail(email.trim());
+  const isPasswordValid = validatePassword(password);
+  const isConfirmValid =
+    confirmPassword.length > 0 && password === confirmPassword;
 
   /* ---------------- SIGNUP ---------------- */
   const handleSignUp = async (e) => {
@@ -27,31 +49,34 @@ const Signup = () => {
     setSuccessMessage(null);
     setLoading(true);
 
-    const formData = new FormData(e.target);
-    const firstName = formData.get("firstName").trim();
-    const lastName = formData.get("lastName").trim();
-    const email = formData.get("email").trim();
-    const password = formData.get("password");
-    const confirmPassword = formData.get("confirmPassword");
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
+    const trimmedEmail = email.trim();
 
     // Validation
-    if (!validateName(firstName)) {
-      setError("First name must be 2–25 letters only.");
+    if (!validateName(trimmedFirstName)) {
+      setError(
+        "First name must be 2-30 characters and can include letters, spaces, . or -."
+      );
       setLoading(false);
       return;
     }
-    if (!validateName(lastName)) {
-      setError("Last name must be 2–25 letters only.");
+    if (!validateName(trimmedLastName)) {
+      setError(
+        "Last name must be 2-30 characters and can include letters, spaces, . or -."
+      );
       setLoading(false);
       return;
     }
-    if (!validateEmail(email)) {
+    if (!validateEmail(trimmedEmail)) {
       setError("Please enter a valid email ending with .com, .net, etc.");
       setLoading(false);
       return;
     }
     if (!validatePassword(password)) {
-      setError("Password must be at least 8 characters.");
+      setError(
+        "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character (e.g., !@#^$*&()-_+=)."
+      );
       setLoading(false);
       return;
     }
@@ -64,14 +89,14 @@ const Signup = () => {
     try {
       // Signup using Supabase default SMTP (email OTP verification)
       const { error } = await supabase.auth.signUp({
-        email,
+        email: trimmedEmail,
         password,
         options: {
           emailRedirectTo: window.location.origin + "/login",
           data: {
-            first_name: firstName,
-            last_name: lastName,
-            full_name: `${firstName} ${lastName}`,
+            first_name: trimmedFirstName,
+            last_name: trimmedLastName,
+            full_name: `${trimmedFirstName} ${trimmedLastName}`,
           },
         },
       });
@@ -80,17 +105,21 @@ const Signup = () => {
         setError(error.message);
       } else {
         void addRegisteredUser({
-          id: `registered-${Date.now()}-${email}`,
-          email,
-          name: `${firstName} ${lastName}`.trim(),
+          id: `registered-${Date.now()}-${trimmedEmail}`,
+          email: trimmedEmail,
+          name: `${trimmedFirstName} ${trimmedLastName}`.trim(),
           registeredAt: new Date().toISOString(),
         });
         setSuccessMessage(
-          "✅ Account created! Check your email for the link to verify your account."
+          "Account created! Check your email for the link to verify your account."
         );
-        setEmailForVerification(email);
+        setEmailForVerification(trimmedEmail);
         setResendCooldown(60); // 60-second cooldown for resending OTP
-        e.target.reset();
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
       }
     } catch {
       setError("Unexpected error occurred. Please try again.");
@@ -115,7 +144,7 @@ const Signup = () => {
         setError(`Failed to send verification OTP: ${error.message}`);
       } else {
         setSuccessMessage(
-          "✅ Verification email sent! Check your inbox or spam folder."
+          "Verification email sent! Check your inbox or spam folder."
         );
         setResendCooldown(60); // start cooldown
       }
@@ -188,14 +217,18 @@ const Signup = () => {
                 type="text"
                 name="firstName"
                 placeholder="First Name"
-                className="input-field"
+                className={`input-field${isFirstNameValid ? " is-valid" : ""}`}
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
                 required
               />
               <input
                 type="text"
                 name="lastName"
                 placeholder="Last Name"
-                className="input-field"
+                className={`input-field${isLastNameValid ? " is-valid" : ""}`}
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
                 required
               />
             </div>
@@ -205,7 +238,9 @@ const Signup = () => {
                 type="email"
                 name="email"
                 placeholder="Email"
-                className="input-field"
+                className={`input-field${isEmailValid ? " is-valid" : ""}`}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 required
               />
             </div>
@@ -215,7 +250,11 @@ const Signup = () => {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
-                className="input-field password-input"
+                className={`input-field password-input${
+                  isPasswordValid ? " is-valid" : ""
+                }`}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 required
               />
               <button
@@ -227,7 +266,8 @@ const Signup = () => {
               </button>
             </div>
             <p className="password-requirements">
-              Password should contain: at least 8 characters.
+              Password should contain 8 characters that have one uppercase,
+              one lowercase, numbers and special characters (e.g., !@#^$*&()-_+=).
             </p>
 
             <div className="input-group password-group">
@@ -235,7 +275,11 @@ const Signup = () => {
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 placeholder="Confirm Password"
-                className="input-field password-input"
+                className={`input-field password-input${
+                  isConfirmValid ? " is-valid" : ""
+                }`}
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
                 required
               />
               <button
@@ -293,3 +337,6 @@ const Signup = () => {
 };
 
 export default Signup;
+
+
+
