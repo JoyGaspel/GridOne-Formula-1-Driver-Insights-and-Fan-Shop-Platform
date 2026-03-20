@@ -317,6 +317,8 @@
     padding: 10px;
     margin-top: 10px;
     box-sizing: border-box;
+    max-height: calc(var(--vh, 1vh) * 100 - 86px);
+    overflow-y: auto;
   }
 
   .mini-search-wrap {
@@ -370,10 +372,10 @@
   }
 
   .mini-row {
-    width: 100vw;
+    width: min(100%, calc(100% - 24px));
     margin-left: 0;
     margin-right: 0;
-    min-height: auto;
+    min-height: 60px;
     padding: 10px 0;
     grid-template-columns: 1fr auto auto;
     justify-items: stretch;
@@ -397,6 +399,8 @@
     padding: 10px;
     margin-top: 10px;
     box-sizing: border-box;
+    max-height: calc(var(--vh, 1vh) * 100 - 86px);
+    overflow-y: auto;
   }
 
   .mini-collapse.open {
@@ -409,11 +413,11 @@
   }
 
   .mini-brand-title {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .mini-brand-link img {
-    height: 46px;
+    height: 40px;
   }
 
   .mini-actions {
@@ -444,7 +448,7 @@
 
 @media (max-width: 520px) {
   .mini-row {
-    width: 100vw;
+    width: min(100%, calc(100% - 24px));
     padding-left: 0;
     padding-right: 0;
     grid-template-columns: 1fr auto auto;
@@ -481,5 +485,20 @@
 
   .mini-toggle {
     margin-left: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .mini-departments {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mini-brand-title {
+    font-size: 15px;
+  }
+
+  .mini-icon-btn {
+    width: 30px;
+    height: 30px;
   }
 }

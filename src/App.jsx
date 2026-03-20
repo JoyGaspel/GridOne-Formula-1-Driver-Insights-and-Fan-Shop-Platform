@@ -41,8 +41,10 @@ export default function App() {
   return (
     <>
       {!isOnline && (
-        <div className="offline-banner">
-          No Internet Connection, Please Connect to the Internet
+        <div className="offline-overlay" role="status" aria-live="assertive">
+          <div className="offline-overlay-card">
+            No Internet Connection, Please Connect to the Internet
+          </div>
         </div>
       )}
       <AppRoutes />

@@ -40,7 +40,16 @@ html[data-viewport="xs"] :where([class$="-main"], [class$="-page"], [class$="-la
   padding-right: var(--page-padding);
 }
 
+html[data-viewport="sm"] :where([class$="-main"], [class$="-page"], [class$="-layout"], main) {
+  padding-left: var(--page-padding);
+  padding-right: var(--page-padding);
+}
+
 html[data-viewport="xs"] .surface-card {
+  padding: var(--card-padding);
+}
+
+html[data-viewport="sm"] .surface-card {
   padding: var(--card-padding);
 }
 
@@ -61,13 +70,53 @@ html[data-viewport="xs"] :where(
     .store-catalog-layout,
     .cart-layout,
     .orders-layout,
-    .detail-layout
+    .detail-layout,
+    .admin-db-layout,
+    .admin-db-super-grid,
+    .admin-db-account
+  ) {
+  grid-template-columns: 1fr !important;
+}
+
+html[data-viewport="sm"] :where(
+    .detail-hero,
+    .detail-content-grid,
+    .race-weekend-section,
+    .race-weekend-details,
+    .calendar-grid,
+    .teams-grid,
+    .drivers-grid,
+    .circuits-grid,
+    .cards-schedule,
+    .cards-drivers,
+    .cards-teams,
+    .cards-circuits,
+    .store-showcase,
+    .store-catalog-layout,
+    .cart-layout,
+    .orders-layout,
+    .detail-layout,
+    .admin-db-layout,
+    .admin-db-super-grid,
+    .admin-db-account
   ) {
   grid-template-columns: 1fr !important;
 }
 
 html[data-viewport="xs"] .navbar-collapse,
-html[data-viewport="xs"] .mini-collapse {
+html[data-viewport="xs"] .mini-collapse,
+html[data-viewport="sm"] .navbar-collapse,
+html[data-viewport="sm"] .mini-collapse {
   max-height: calc(var(--vh, 1vh) * 100 - 68px);
   overflow-y: auto;
+}
+
+html[data-viewport="xs"] :where(.navbar-links, .navbar-actions),
+html[data-viewport="sm"] :where(.navbar-links, .navbar-actions) {
+  width: 100%;
+}
+
+html[data-viewport="xs"] :where(.navbar-container, .mini-row),
+html[data-viewport="sm"] :where(.navbar-container, .mini-row) {
+  min-width: 0;
 }
