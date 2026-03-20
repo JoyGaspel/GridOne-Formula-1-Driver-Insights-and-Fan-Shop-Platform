@@ -17,7 +17,18 @@ const createProductImage = (title, primary, accent) => {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
-export const STORE_CATEGORIES = ["All", "Men", "Women", "Kids", "Headwear", "Accessories", "Collectibles"];
+export const STORE_CATEGORIES = [
+  "All",
+  "Men",
+  "Women",
+  "Kids",
+  "Headwear",
+  "Accessories",
+  "Collectibles",
+  "Jackets",
+  "Caps",
+  "Shirts",
+];
 
 export const STORE_TEAMS = [
   "All Teams",
@@ -1761,6 +1772,39 @@ const normalizeProductName = (value) =>
     .replace(/\s+/g, " ")
     .trim();
 
+const isSvgPlaceholder = (value) => String(value || "").startsWith("data:image/svg+xml");
+const OFFICIAL_STORE_IMAGE_HOSTS = ["f1store.formula1.com", "images.footballfanatics.com"];
+
+const isOfficialStoreImage = (value) => {
+  const url = String(value || "");
+  if (!url) return false;
+  return OFFICIAL_STORE_IMAGE_HOSTS.some((host) => url.includes(host));
+};
+
+const hasOfficialStoreImage = (product) => {
+  if (!product) return false;
+  if (isOfficialStoreImage(product.image)) return true;
+  const images = Array.isArray(product.images) ? product.images : [];
+  return images.some(isOfficialStoreImage);
+};
+
+const dedupeByName = (items) => {
+  const seen = new Set();
+  return (Array.isArray(items) ? items : []).filter((item) => {
+    const key = normalizeStoreValue(item?.name);
+    if (!key) {
+      return false;
+    }
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+};
+
+export const dedupeStoreProducts = (items) => dedupeByName(items);
+
 const resolveTeamFromText = (value) => {
   const text = normalizeStoreValue(value);
   if (!text) {
@@ -1950,20 +1994,164 @@ const SEEDED_STORE_PRODUCTS = ensureMinimumStoreProducts(RAW_STORE_PRODUCTS, {
   minPer: 0,
 });
 
-export const STORE_PRODUCTS = SEEDED_STORE_PRODUCTS.map((product) => {
+const TEAM_PRODUCT_PAIRS = {
+  McLaren: [
+    { name: "McLaren 2022 New Era M Logo 9Forty Cap", category: "Caps" },
+    { name: "McLaren Essential Logo Hoodie - Smoke Green", category: "Jackets" },
+  ],
+  "Red Bull": [
+    { name: "Oracle Red Bull Racing New Era 9FIFTY Cap", category: "Caps" },
+    { name: "Red Bull Racing 2025 Team Polo", category: "Shirts" },
+  ],
+  Ferrari: [
+    { name: "Scuderia Ferrari 2025 Pinstripe Team Cap", category: "Caps" },
+    { name: "Scuderia Ferrari 2023 Team Charles Leclerc T-Shirt", category: "Shirts" },
+  ],
+  Mercedes: [
+    { name: "Mercedes AMG Petronas adidas F1 2025 Team Cap - White", category: "Caps" },
+    { name: "Mercedes AMG Petronas adidas F1 Logo Zip Hoodie - Black", category: "Jackets" },
+  ],
+  Williams: [
+    { name: "Williams Racing 2024 Team T-Shirt - White", category: "Shirts" },
+    { name: "Williams Racing New Era Carlos Sainz Replica Tech T-Shirt - Navy", category: "Shirts" },
+  ],
+  "Aston Martin": [
+    { name: "Aston Martin Aramco Cognizant F1 2026 Team Cap - Black", category: "Caps" },
+    { name: "Aston Martin Aramco Cognizant F1 2023 Official Team T-Shirt", category: "Shirts" },
+  ],
+  Audi: [
+    { name: "Audi F1 2026 Replica Team T-Shirt", category: "Shirts" },
+    { name: "Audi F1 2026 Nico Hulkenberg Driver Cap", category: "Caps" },
+  ],
+  "Racing Bulls": [
+    { name: "VCARB New Era 9FORTY Team Cap", category: "Caps" },
+    { name: "VCARB Hugo Fanwear Hoodie - Black", category: "Jackets" },
+  ],
+  Haas: [
+    { name: "Haas F1 Team New Era 9SEVENTY 200th Race Special Edition Cap", category: "Caps" },
+    { name: "Haas F1 Moneygram 2024 Team-T-Shirt", category: "Shirts" },
+  ],
+  Alpine: [
+    { name: "BWT Alpine F1 Team 2022 Kimoa Fernando Alonso Flatbrim Cap", category: "Caps" },
+    { name: "BWT Alpine F1 Team 2022 T-Shirt - Blue", category: "Shirts" },
+  ],
+  Cadillac: [
+    { name: "Cadillac Tommy Hilfiger 2026 Sergio Perez Team Cap - Black", category: "Caps" },
+    { name: "Cadillac Tommy Hilfiger Team Hoodie - Unisex", category: "Jackets" },
+  ],
+};
+
+const DRIVER_PRODUCT_PAIRS = {
+  "Lando Norris": [
+    { name: "McLaren Lando Norris Driver T-Shirt - White - Unisex", category: "Shirts" },
+    { name: "McLaren 2022 New Era M Logo 9Forty Cap", category: "Caps" },
+  ],
+  "Max Verstappen": [
+    { name: "Red Bull Racing 2024 Max Verstappen F1 World Drivers' Champion Poster", category: "Collectibles" },
+    { name: "Red Bull Racing 2025 Team Max Verstappen Driver T-Shirt", category: "Shirts" },
+  ],
+  "Charles Leclerc": [
+    { name: "Scuderia Ferrari 2026 Charles Leclerc Special Edition Shanghai GP Cap - Red", category: "Caps" },
+    { name: "Scuderia Ferrari Charles Leclerc T-Shirt – Unisex", category: "Shirts" },
+  ],
+  "Lewis Hamilton": [
+    { name: "Scuderia Ferrari Lewis Hamilton 2025 Silverstone Special Edition Cap", category: "Caps" },
+    { name: "Scuderia Ferrari 2025 Pinstripe Team Cap", category: "Caps" },
+  ],
+  "Carlos Sainz": [
+    { name: "Williams Racing New Era Carlos Sainz Replica Tech T-Shirt - Navy", category: "Shirts" },
+    { name: "Williams Racing 2024 Team T-Shirt - White", category: "Shirts" },
+  ],
+  "Liam Lawson": [
+    { name: "VCARB New Era 9FORTY Team Cap", category: "Caps" },
+    { name: "VCARB Hugo Fanwear Hoodie - Black", category: "Jackets" },
+  ],
+  "Nico Hulkenberg": [
+    { name: "Audi F1 2026 Nico Hulkenberg Driver Cap", category: "Caps" },
+    { name: "Audi F1 2026 Replica Team T-Shirt", category: "Shirts" },
+  ],
+  "Arvid Lindblad": [
+    { name: "VCARB New Era 9FORTY Team Cap", category: "Caps" },
+    { name: "VCARB Hugo Fanwear Hoodie - Black", category: "Jackets" },
+  ],
+  "Sergio Perez": [
+    { name: "Cadillac Tommy Hilfiger 2026 Sergio Perez Team Cap - Black", category: "Caps" },
+    { name: "Cadillac Tommy Hilfiger Team Hoodie - Unisex", category: "Jackets" },
+  ],
+};
+
+const RACING_BULLS_DRIVER_PRODUCTS = {
+  "Liam Lawson": ["vcarb-2026-team-tshirt", "vcarb-2024-team-full-zip-hoodie"],
+  "Arvid Lindblad": ["vcarb-2024-team-quarter-zip", "vcarb-fanwear-hoodie-black"],
+};
+
+const resolveRacingBullsDriver = (product) => {
+  if (!product || product.team !== "Racing Bulls") {
+    return product?.driver || "";
+  }
+  if (product.driver && product.driver !== "Teamwear") {
+    return product.driver;
+  }
+
+  const id = String(product.id || "");
+  for (const [driver, ids] of Object.entries(RACING_BULLS_DRIVER_PRODUCTS)) {
+    if (ids.includes(id)) {
+      return driver;
+    }
+  }
+
+  return product.driver || "Teamwear";
+};
+
+export const applyDriverProductOverride = (product) => {
+  if (!product) {
+    return product;
+  }
+  const name = String(product.name || "");
+  if (!name.toLowerCase().includes("fan collectible")) {
+    return product;
+  }
+  const match = name.match(/(\d+)\s*$/);
+  const index = match ? Number(match[1]) - 1 : 0;
+  const driverPair = DRIVER_PRODUCT_PAIRS[product.driver];
+  const team = DRIVER_TEAM_MAP[product.driver] || resolveStoreTeam(product);
+  const pair = driverPair || TEAM_PRODUCT_PAIRS[team];
+  if (!pair || pair.length === 0) {
+    return product;
+  }
+  const override = pair[Math.abs(index) % pair.length];
+  return {
+    ...product,
+    name: override.name,
+    category: override.category,
+  };
+};
+
+export const STORE_PRODUCTS = dedupeByName(SEEDED_STORE_PRODUCTS.map((product) => {
   const baseImages = Array.isArray(product.images) ? product.images : [];
   const images = baseImages.length > 0 ? baseImages : product.image ? [product.image] : [];
   const normalizedCategory = normalizeStoreCategory(product.category);
   const normalizedName = normalizeProductName(product.name);
   const normalizedTeam = resolveStoreTeam({ ...product, category: normalizedCategory });
-  return {
+  const withOverrides = applyDriverProductOverride({
     ...product,
     name: normalizedName,
     category: normalizedCategory,
+  });
+  const resolvedDriver = resolveRacingBullsDriver(withOverrides);
+  return {
+    ...product,
+    name: withOverrides.name,
+    category: withOverrides.category,
     team: normalizedTeam,
+    driver: resolvedDriver,
     images,
   };
-});
+}).filter((product) =>
+  !isSvgPlaceholder(product?.image) &&
+  hasOfficialStoreImage(product) &&
+  !/fan collectible/i.test(product?.name || "")
+));
 
 export const ORDER_FLOW = ["To Pack", "Packed", "Shipped", "Out for Delivery", "Delivered"];
 
