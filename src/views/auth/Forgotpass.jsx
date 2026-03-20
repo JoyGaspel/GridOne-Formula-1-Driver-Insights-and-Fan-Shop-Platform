@@ -266,6 +266,9 @@ const ForgotPassword = () => {
                     <EyeIcon isOpen={showPassword} />
                   </button>
                 </div>
+                <p className="password-requirements">
+                  Password should contain: at least 8 characters.
+                </p>
                 <div className="input-group password-group">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -312,6 +315,9 @@ const ForgotPassword = () => {
                   <EyeIcon isOpen={showPassword} />
                 </button>
               </div>
+              <p className="password-requirements">
+                Password should contain: at least 8 characters.
+              </p>
               <div className="input-group password-group">
                 <input
                   type={showConfirmPassword ? "text" : "password"}

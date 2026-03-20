@@ -201,6 +201,12 @@
   gap: 0.5rem;
 }
 
+.password-requirements {
+  margin: 0 0 0.4rem;
+  color: #a5acb8;
+  font-size: 0.85rem;
+}
+
 .field-label {
   font-size: 0.8rem;
   color: #b5bcc8;

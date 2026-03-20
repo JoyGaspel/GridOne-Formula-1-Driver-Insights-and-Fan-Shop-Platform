@@ -102,6 +102,12 @@ body {
   padding-right: 3.25rem;
 }
 
+.password-requirements {
+  margin: 2px 0 12px;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
 .toggle-password {
   position: absolute;
   right: 1rem;

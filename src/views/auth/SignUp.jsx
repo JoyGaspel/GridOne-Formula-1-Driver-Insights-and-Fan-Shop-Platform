@@ -18,8 +18,7 @@ const Signup = () => {
   const validateName = (name) => /^[A-Za-z]{2,25}$/.test(name);
   const validateEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.(com|net|org|edu|gov|io|co)$/i.test(email);
-  const validatePassword = (password) =>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(password); // Supabase min 6 chars
+  const validatePassword = (password) => /^.{8,}$/.test(password);
 
   /* ---------------- SIGNUP ---------------- */
   const handleSignUp = async (e) => {
@@ -52,9 +51,7 @@ const Signup = () => {
       return;
     }
     if (!validatePassword(password)) {
-      setError(
-        "Password must be at least 6 characters and include uppercase, lowercase, and a number."
-      );
+      setError("Password must be at least 8 characters.");
       setLoading(false);
       return;
     }
@@ -229,6 +226,9 @@ const Signup = () => {
                 <EyeIcon isOpen={showPassword} />
               </button>
             </div>
+            <p className="password-requirements">
+              Password should contain: at least 8 characters.
+            </p>
 
             <div className="input-group password-group">
               <input

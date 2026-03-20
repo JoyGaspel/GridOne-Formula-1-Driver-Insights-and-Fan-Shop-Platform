@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AppRoutes from "./routes/AppRoutes";
 
 export default function App() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
   useEffect(() => {
     const updateViewport = () => {
       const width = window.innerWidth;
@@ -23,5 +25,27 @@ export default function App() {
     };
   }, []);
 
-  return <AppRoutes />;
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  return (
+    <>
+      {!isOnline && (
+        <div className="offline-banner">
+          No Internet Connection, Please Connect to the Internet
+        </div>
+      )}
+      <AppRoutes />
+    </>
+  );
 }

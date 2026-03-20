@@ -1416,6 +1416,9 @@ export default function MyAccount() {
                     onChange={(event) => setNewPassword(event.target.value)}
                     placeholder="At least 8 characters"
                   />
+                  <p className="password-requirements">
+                    Password should contain: at least 8 characters.
+                  </p>
 
                   <label className="field-label" htmlFor="confirmPassword">
                     Confirm password

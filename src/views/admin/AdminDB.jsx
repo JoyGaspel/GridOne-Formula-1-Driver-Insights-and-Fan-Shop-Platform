@@ -3269,6 +3269,9 @@ const AdminDashboard = () => {
                       placeholder="At least 8 characters"
                     />
                   </label>
+                  <p className="password-requirements">
+                    Password should contain: at least 8 characters.
+                  </p>
                   <label className="admin-db-field">
                     <span>Confirm password</span>
                     <input
