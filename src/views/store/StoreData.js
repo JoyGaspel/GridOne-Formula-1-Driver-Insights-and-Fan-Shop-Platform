@@ -2147,11 +2147,7 @@ export const STORE_PRODUCTS = dedupeByName(SEEDED_STORE_PRODUCTS.map((product) =
     driver: resolvedDriver,
     images,
   };
-}).filter((product) =>
-  !isSvgPlaceholder(product?.image) &&
-  hasOfficialStoreImage(product) &&
-  !/fan collectible/i.test(product?.name || "")
-));
+}));
 
 export const ORDER_FLOW = ["To Pack", "Packed", "Shipped", "Out for Delivery", "Delivered"];
 

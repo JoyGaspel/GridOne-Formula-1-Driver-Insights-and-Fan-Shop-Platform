@@ -18,8 +18,6 @@ import { ROUTE_PATHS } from "../../routes/routePaths";
 import {
   DELIVERY_FLOW,
   ORDER_FLOW,
-  applyDriverProductOverride,
-  dedupeStoreProducts,
   STORE_CATEGORIES,
   STORE_DRIVERS,
   STORE_PRODUCTS,
@@ -474,26 +472,23 @@ export default function Store() {
       return;
     }
 
-    const normalized = data
-      .map((product) => ({
-        id: product.id,
-        name: product.name,
-        category: product.category,
-        team: product.team,
-        driver: product.driver,
-        price: Number(product.price || 0),
-        stock: Number(product.stock || 0),
-        sizes: Array.isArray(product.sizes) ? product.sizes : ["One Size"],
-        description: product.description || "",
-        details: product.details || "",
-        image: product.image || (Array.isArray(product.images) ? product.images[0] : "") || "",
-        images: Array.isArray(product.images) ? product.images : [],
-      }))
-      .map(applyDriverProductOverride);
+    const normalized = data.map((product) => ({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      team: product.team,
+      driver: product.driver,
+      price: Number(product.price || 0),
+      stock: Number(product.stock || 0),
+      sizes: Array.isArray(product.sizes) ? product.sizes : ["One Size"],
+      description: product.description || "",
+      details: product.details || "",
+      image: product.image || (Array.isArray(product.images) ? product.images[0] : "") || "",
+      images: Array.isArray(product.images) ? product.images : [],
+    }));
 
-    const deduped = dedupeStoreProducts(normalized);
-    setProducts(deduped);
-    writeCachedList(STORE_PRODUCTS_CACHE_KEY, deduped);
+    setProducts(normalized);
+    writeCachedList(STORE_PRODUCTS_CACHE_KEY, normalized);
   }, []);
 
   const loadDiscounts = useCallback(async () => {
@@ -539,10 +534,7 @@ export default function Store() {
     const cachedProducts = readCachedList(STORE_PRODUCTS_CACHE_KEY);
     const cachedDiscounts = readCachedList(STORE_DISCOUNTS_CACHE_KEY);
     if (cachedProducts.length > 0) {
-      const deduped = dedupeStoreProducts(
-        cachedProducts.map(applyDriverProductOverride)
-      );
-      setProducts(deduped);
+      setProducts(cachedProducts);
     }
     if (cachedDiscounts.length > 0) {
       setDiscounts(cachedDiscounts);
