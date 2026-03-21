@@ -140,6 +140,7 @@ const STORE_ORDERS_TABLE = "store_orders";
 const STORE_CARTS_TABLE = "store_cart_items";
 const STORE_PRODUCTS_TABLE = "store_products";
 const STORE_DISCOUNTS_TABLE = "store_discounts";
+const REFUND_REQUESTS_TABLE = "store_refund_requests";
 const ADMIN_ACCOUNTS_TABLE = "admin_accounts";
 const STORE_PRODUCT_IMAGE_BUCKET = "store-product-images";
 const AUTH_USERS_RPC = "admin_list_auth_users";
@@ -540,6 +541,12 @@ function normalizeStoreOrder(order) {
       mobile: String(safeSummary.mobile ?? recipient?.mobile ?? "").trim(),
       address: String(safeSummary.address ?? recipient?.address ?? "").trim(),
       paymentMethod: String(safeSummary.paymentMethod ?? paymentMethod ?? "GCash"),
+      packedAt: String(safeSummary.packedAt ?? ""),
+      shippedAt: String(safeSummary.shippedAt ?? ""),
+      outForDeliveryAt: String(safeSummary.outForDeliveryAt ?? ""),
+      deliveredAt: String(safeSummary.deliveredAt ?? ""),
+      refundPendingAt: String(safeSummary.refundPendingAt ?? ""),
+      refundedAt: String(safeSummary.refundedAt ?? ""),
     };
   };
 
@@ -625,6 +632,34 @@ function formatOrderSummaryForAdmin(summary) {
   return parts.join(" | ");
 }
 
+function formatStatusDate(value) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleDateString("en-GB");
+}
+
+function getOrderStatusDisplay(order) {
+  const status = String(order?.orderStatus || "-");
+  const normalized = status.trim().toLowerCase();
+  const summary = order?.summary || {};
+  const statusDateMap = {
+    packed: summary.packedAt,
+    shipped: summary.shippedAt,
+    "out for delivery": summary.outForDeliveryAt,
+    delivered: summary.deliveredAt,
+    "refund pending": summary.refundPendingAt,
+    refunded: summary.refundedAt,
+  };
+  const dateValue = statusDateMap[normalized];
+  const formattedDate = formatStatusDate(dateValue);
+  return formattedDate ? `${status} | ${formattedDate}` : status;
+}
+
 function normalizeStoreCartItem(item) {
   if (!item) {
     return null;
@@ -644,6 +679,53 @@ function normalizeStoreCartItem(item) {
     quantity: Number(item.quantity || 0),
     createdAt: item.created_at || new Date().toISOString(),
   };
+}
+
+function normalizeRefundRequest(entry) {
+  if (!entry) {
+    return null;
+  }
+
+  return {
+    id: entry.id || null,
+    orderId: entry.order_id || entry.orderId || null,
+    orderCode: entry.order_code || entry.orderCode || "",
+    createdAt: entry.created_at || entry.createdAt || "",
+  };
+}
+
+function applyRefundPendingDates(orders, refundEntries) {
+  if (!Array.isArray(orders) || orders.length === 0) {
+    return orders ?? [];
+  }
+  if (!Array.isArray(refundEntries) || refundEntries.length === 0) {
+    return orders;
+  }
+
+  const pendingMap = new Map();
+  refundEntries.forEach((entry) => {
+    const key = entry?.orderId ? `id:${entry.orderId}` : entry?.orderCode ? `code:${entry.orderCode}` : "";
+    if (!key || pendingMap.has(key)) {
+      return;
+    }
+    pendingMap.set(key, entry.createdAt);
+  });
+
+  return orders.map((order) => {
+    const byId = order?.dbId ? pendingMap.get(`id:${order.dbId}`) : "";
+    const byCode = order?.id ? pendingMap.get(`code:${order.id}`) : "";
+    const pendingAt = byId || byCode || "";
+    if (!pendingAt) {
+      return order;
+    }
+    return {
+      ...order,
+      summary: {
+        ...(order.summary || {}),
+        refundPendingAt: pendingAt,
+      },
+    };
+  });
 }
 
 function normalizeStoreProduct(product) {
@@ -771,6 +853,7 @@ const AdminDashboard = () => {
   });
   const [storeOrders, setStoreOrders] = useState([]);
   const [storeCarts, setStoreCarts] = useState([]);
+  const [refundRequests, setRefundRequests] = useState([]);
   const [accessState, setAccessState] = useState({
     approvedAdmins: [],
     pendingRequests: [],
@@ -785,6 +868,7 @@ const AdminDashboard = () => {
   const [syncingUsers, setSyncingUsers] = useState(false);
   const [syncingStoreData, setSyncingStoreData] = useState(false);
   const [productCategoryFilter, setProductCategoryFilter] = useState("All");
+  const [orderStatusDates, setOrderStatusDates] = useState({});
   const hasSeededTeamsRef = useRef(false);
   const currentAdminRecord = useMemo(() => {
     const targetEmail = String(adminUser?.email || "").trim().toLowerCase();
@@ -802,6 +886,8 @@ const AdminDashboard = () => {
 
   const loadStoreData = useCallback(async () => {
     setError("");
+    let normalizedOrders = null;
+    let normalizedRefunds = [];
     const [ordersRpc, cartsRpc] = await Promise.all([
       supabase.rpc(ADMIN_LIST_STORE_ORDERS_RPC),
       supabase.rpc(ADMIN_LIST_STORE_CARTS_RPC),
@@ -809,9 +895,7 @@ const AdminDashboard = () => {
     const errors = [];
 
     if (!ordersRpc.error && Array.isArray(ordersRpc.data)) {
-      const normalizedOrders = ordersRpc.data.map(normalizeStoreOrder).filter(Boolean);
-      setStoreOrders(normalizedOrders);
-      writeCachedList(STORE_ORDERS_CACHE_KEY, normalizedOrders);
+      normalizedOrders = ordersRpc.data.map(normalizeStoreOrder).filter(Boolean);
     } else {
       if (ordersRpc.error) {
         errors.push(
@@ -824,9 +908,7 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        const normalizedOrders = data.map(normalizeStoreOrder).filter(Boolean);
-        setStoreOrders(normalizedOrders);
-        writeCachedList(STORE_ORDERS_CACHE_KEY, normalizedOrders);
+        normalizedOrders = data.map(normalizeStoreOrder).filter(Boolean);
       }
     }
 
@@ -850,6 +932,24 @@ const AdminDashboard = () => {
         setStoreCarts(normalizedCarts);
         writeCachedList(STORE_CARTS_CACHE_KEY, normalizedCarts);
       }
+    }
+
+    const { data: refundData, error: refundError } = await supabase
+      .from(REFUND_REQUESTS_TABLE)
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!refundError && Array.isArray(refundData)) {
+      normalizedRefunds = refundData.map(normalizeRefundRequest).filter(Boolean);
+      setRefundRequests(normalizedRefunds);
+    } else if (refundError) {
+      errors.push(`refunds (${refundError.code || "REFUND_ERROR"}: ${refundError.message || "Unknown error"})`);
+    }
+
+    if (normalizedOrders) {
+      const mergedOrders = applyRefundPendingDates(normalizedOrders, normalizedRefunds);
+      setStoreOrders(mergedOrders);
+      writeCachedList(STORE_ORDERS_CACHE_KEY, mergedOrders);
     }
 
     if (errors.length > 0) {
@@ -1553,6 +1653,15 @@ const AdminDashboard = () => {
         email,
         order?.recipient?.fullName,
         order?.recipient?.mobile,
+        order?.recipient?.address,
+        order?.summary?.address,
+        order?.createdAt,
+        order?.summary?.packedAt,
+        order?.summary?.shippedAt,
+        order?.summary?.outForDeliveryAt,
+        order?.summary?.deliveredAt,
+        order?.summary?.refundPendingAt,
+        order?.summary?.refundedAt,
         order.paymentStatus,
         order.orderStatus,
         order.deliveryStatus,
@@ -1924,18 +2033,22 @@ const AdminDashboard = () => {
     }
   };
 
-  const updateStoreOrderProgress = async (orderId, changes) => {
+  const updateStoreOrderProgress = async (orderId, changes, summaryPatch = null) => {
     const currentOrder = (storeOrders ?? []).find((order) => order.id === orderId);
     if (!currentOrder) {
       setError("Unable to locate the order to update. Refresh the orders list.");
       return;
     }
 
+    const nextSummary = summaryPatch
+      ? { ...(currentOrder.summary || {}), ...summaryPatch }
+      : currentOrder.summary;
     const nextOrder = {
       ...currentOrder,
       paymentStatus: changes.paymentStatus ?? currentOrder.paymentStatus,
       orderStatus: changes.orderStatus ?? currentOrder.orderStatus,
       deliveryStatus: changes.deliveryStatus ?? currentOrder.deliveryStatus,
+      summary: nextSummary,
     };
 
     setStoreOrders((prev) =>
@@ -1984,6 +2097,21 @@ const AdminDashboard = () => {
       }
     }
 
+    if (!error && summaryPatch) {
+      const summaryUpdate = { summary: nextSummary };
+      if (nextOrder.dbId) {
+        ({ error } = await supabase
+          .from(STORE_ORDERS_TABLE)
+          .update(summaryUpdate)
+          .eq("id", nextOrder.dbId));
+      } else if (nextOrder.id) {
+        ({ error } = await supabase
+          .from(STORE_ORDERS_TABLE)
+          .update(summaryUpdate)
+          .eq("order_code", nextOrder.id));
+      }
+    }
+
     if (error) {
       setError(
         error.message ||
@@ -1992,6 +2120,43 @@ const AdminDashboard = () => {
     } else {
       void loadStoreData();
     }
+  };
+
+  const formatDateInputValue = (value) => {
+    if (!value) {
+      return "";
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 10);
+  };
+
+  const resolveOrderDateValue = (orderId, key, fallback) => {
+    const stored = orderStatusDates?.[orderId]?.[key];
+    if (typeof stored === "string") {
+      return stored;
+    }
+    return formatDateInputValue(fallback);
+  };
+
+  const updateOrderDateValue = (orderId, key, value) => {
+    setOrderStatusDates((prev) => ({
+      ...prev,
+      [orderId]: {
+        ...(prev?.[orderId] || {}),
+        [key]: value,
+      },
+    }));
+  };
+
+  const toIsoDate = (value) => {
+    if (!value) {
+      return "";
+    }
+    return new Date(`${value}T00:00:00`).toISOString();
   };
 
   const getOrderStatusButtonClass = (currentStatus, targetStatus) => {
@@ -3522,6 +3687,8 @@ const AdminDashboard = () => {
                       <th>Email</th>
                       <th>Customer</th>
                       <th>Mobile</th>
+                      <th>Ordered At</th>
+                      <th>Address</th>
                       <th>Summary</th>
                       <th>Items</th>
                       <th>Total</th>
@@ -3538,6 +3705,13 @@ const AdminDashboard = () => {
                           const orderImage = (Array.isArray(order.items) ? order.items : [])
                             .map((item) => String(item?.image || "").trim())
                             .find(Boolean);
+                          const orderAddress =
+                            String(order?.summary?.address || order?.recipient?.address || "").trim() ||
+                            "N/A";
+                          const orderTimestamp = order?.createdAt
+                            ? new Date(order.createdAt).toLocaleString()
+                            : "N/A";
+                          const refundPendingDate = formatDateInputValue(order?.summary?.refundPendingAt);
                           return (
                             <>
                         <td data-label="Order">{order.id}</td>
@@ -3554,6 +3728,8 @@ const AdminDashboard = () => {
                         <td data-label="Email">{(superState.users ?? []).find((user) => user.id === order.userId)?.email || "N/A"}</td>
                         <td data-label="Customer">{order?.recipient?.fullName || "-"}</td>
                         <td data-label="Mobile">{order?.recipient?.mobile || "N/A"}</td>
+                        <td data-label="Ordered At">{orderTimestamp}</td>
+                        <td data-label="Address">{orderAddress}</td>
                         <td data-label="Summary" className="admin-db-summary-cell" title={formatOrderSummaryForAdmin(order.summary)}>
                           {formatOrderSummaryForAdmin(order.summary)}
                         </td>
@@ -3566,38 +3742,130 @@ const AdminDashboard = () => {
                           }).format(Number(order.total || 0))}
                         </td>
                         <td data-label="Payment">{order.paymentStatus || "-"}</td>
-                        <td data-label="Order Status">{order.orderStatus || "-"}</td>
+                        <td data-label="Order Status">{getOrderStatusDisplay(order)}</td>
                         <td data-label="Delivery">{order.deliveryStatus || "-"}</td>
                         <td data-label="Action">
                           <div className="admin-db-archive-actions">
                             <button
                               type="button"
                               className={getOrderStatusButtonClass(order.orderStatus, "Packed")}
-                              onClick={() => updateStoreOrderProgress(order.id, { orderStatus: "Packed" })}
+                              onClick={() =>
+                                updateStoreOrderProgress(order.id, { orderStatus: "Packed" }, {
+                                  packedAt:
+                                    toIsoDate(
+                                      resolveOrderDateValue(order.id, "packedAt", order?.summary?.packedAt),
+                                    ) || new Date().toISOString(),
+                                })
+                              }
                             >
                               Pack
                             </button>
+                            <input
+                              type="date"
+                              className="admin-db-order-date-input"
+                              value={resolveOrderDateValue(order.id, "packedAt", order?.summary?.packedAt)}
+                              onChange={(event) =>
+                                updateOrderDateValue(order.id, "packedAt", event.target.value)
+                              }
+                              aria-label="Packed date"
+                            />
                             <button
                               type="button"
                               className={getOrderStatusButtonClass(order.orderStatus, "Shipped")}
-                              onClick={() => updateStoreOrderProgress(order.id, { orderStatus: "Shipped", deliveryStatus: "Linehaul" })}
+                              onClick={() =>
+                                updateStoreOrderProgress(
+                                  order.id,
+                                  { orderStatus: "Shipped", deliveryStatus: "Linehaul" },
+                                  {
+                                    shippedAt:
+                                      toIsoDate(
+                                        resolveOrderDateValue(
+                                          order.id,
+                                          "shippedAt",
+                                          order?.summary?.shippedAt,
+                                        ),
+                                      ) || new Date().toISOString(),
+                                  },
+                                )
+                              }
                             >
                               Ship
                             </button>
+                            <input
+                              type="date"
+                              className="admin-db-order-date-input"
+                              value={resolveOrderDateValue(order.id, "shippedAt", order?.summary?.shippedAt)}
+                              onChange={(event) =>
+                                updateOrderDateValue(order.id, "shippedAt", event.target.value)
+                              }
+                              aria-label="Shipped date"
+                            />
                             <button
                               type="button"
                               className={getOrderStatusButtonClass(order.orderStatus, "Out for Delivery")}
-                              onClick={() => updateStoreOrderProgress(order.id, { orderStatus: "Out for Delivery", deliveryStatus: "Last-mile" })}
+                              onClick={() =>
+                                updateStoreOrderProgress(
+                                  order.id,
+                                  { orderStatus: "Out for Delivery", deliveryStatus: "Last-mile" },
+                                  {
+                                    outForDeliveryAt:
+                                      toIsoDate(
+                                        resolveOrderDateValue(
+                                          order.id,
+                                          "outForDeliveryAt",
+                                          order?.summary?.outForDeliveryAt,
+                                        ),
+                                      ) || new Date().toISOString(),
+                                  },
+                                )
+                              }
                             >
                               Out for Delivery
                             </button>
+                            <input
+                              type="date"
+                              className="admin-db-order-date-input"
+                              value={resolveOrderDateValue(
+                                order.id,
+                                "outForDeliveryAt",
+                                order?.summary?.outForDeliveryAt,
+                              )}
+                              onChange={(event) =>
+                                updateOrderDateValue(order.id, "outForDeliveryAt", event.target.value)
+                              }
+                              aria-label="Out for delivery date"
+                            />
                             <button
                               type="button"
                               className={getOrderStatusButtonClass(order.orderStatus, "Delivered")}
-                              onClick={() => updateStoreOrderProgress(order.id, { orderStatus: "Delivered", deliveryStatus: "Delivered" })}
+                              onClick={() =>
+                                updateStoreOrderProgress(
+                                  order.id,
+                                  { orderStatus: "Delivered", deliveryStatus: "Delivered" },
+                                  {
+                                    deliveredAt:
+                                      toIsoDate(
+                                        resolveOrderDateValue(
+                                          order.id,
+                                          "deliveredAt",
+                                          order?.summary?.deliveredAt,
+                                        ),
+                                      ) || new Date().toISOString(),
+                                  },
+                                )
+                              }
                             >
                               Mark as Delivered
                             </button>
+                            <input
+                              type="date"
+                              className="admin-db-order-date-input"
+                              value={resolveOrderDateValue(order.id, "deliveredAt", order?.summary?.deliveredAt)}
+                              onChange={(event) =>
+                                updateOrderDateValue(order.id, "deliveredAt", event.target.value)
+                              }
+                              aria-label="Delivered date"
+                            />
                             <button
                               type="button"
                               className={getOrderStatusButtonClass(order.orderStatus, "Refund Pending")}
@@ -3610,6 +3878,13 @@ const AdminDashboard = () => {
                             >
                               Refund Pending
                             </button>
+                            <input
+                              type="date"
+                              className="admin-db-order-date-input"
+                              value={refundPendingDate}
+                              disabled
+                              aria-label="Refund requested date"
+                            />
                             <button
                               type="button"
                               className={getOrderStatusButtonClass(order.orderStatus, "Refunded")}
@@ -3618,11 +3893,29 @@ const AdminDashboard = () => {
                                   orderStatus: "Refunded",
                                   paymentStatus: "Refunded",
                                   deliveryStatus: "Refunded",
+                                }, {
+                                  refundedAt:
+                                    toIsoDate(
+                                      resolveOrderDateValue(
+                                        order.id,
+                                        "refundedAt",
+                                        order?.summary?.refundedAt,
+                                      ),
+                                    ) || new Date().toISOString(),
                                 })
                               }
                             >
                               Refunded
                             </button>
+                            <input
+                              type="date"
+                              className="admin-db-order-date-input"
+                              value={resolveOrderDateValue(order.id, "refundedAt", order?.summary?.refundedAt)}
+                              onChange={(event) =>
+                                updateOrderDateValue(order.id, "refundedAt", event.target.value)
+                              }
+                              aria-label="Refunded date"
+                            />
                           </div>
                         </td>
                             </>

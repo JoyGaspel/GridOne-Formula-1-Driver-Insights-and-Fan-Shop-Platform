@@ -84,6 +84,33 @@ const getStatusTone = (value) => {
   return "neutral";
 };
 
+const formatStatusDate = (value) => {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleDateString("en-GB");
+};
+
+const getOrderStatusDisplay = (order) => {
+  const status = String(order?.orderStatus || "-");
+  const normalized = status.trim().toLowerCase();
+  const summary = order?.summary || {};
+  const statusDateMap = {
+    packed: summary.packedAt,
+    shipped: summary.shippedAt,
+    "out for delivery": summary.outForDeliveryAt,
+    delivered: summary.deliveredAt,
+    "refund pending": summary.refundPendingAt,
+    refunded: summary.refundedAt,
+  };
+  const formattedDate = formatStatusDate(statusDateMap[normalized]);
+  return formattedDate ? `${status} | ${formattedDate}` : status;
+};
+
 const mapDbOrderRow = (order) => {
   if (!order) {
     return null;
@@ -112,6 +139,7 @@ const mapDbOrderRow = (order) => {
     orderStatus: order.order_status || "Pending",
     deliveryStatus: order.delivery_status || "Warehouse",
     notes: order.notes ?? "",
+    summary: order.summary ?? {},
   };
 };
 
@@ -1573,7 +1601,7 @@ export default function MyAccount() {
                           <div className="purchase-meta-block">
                             <span className="purchase-meta-label">Order status</span>
                             <span className={`purchase-meta-value purchase-meta-${getStatusTone(order.orderStatus)}`}>
-                              {order.orderStatus}
+                              {getOrderStatusDisplay(order)}
                             </span>
                           </div>
                         </div>

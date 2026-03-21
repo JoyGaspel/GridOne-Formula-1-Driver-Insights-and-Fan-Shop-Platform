@@ -660,6 +660,32 @@
   width: 100%;
 }
 
+.admin-db-order-date-input {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: #090f1f;
+  color: var(--text-main);
+  font-family: inherit;
+  color-scheme: dark;
+}
+
+.admin-db-order-date-input:focus-visible {
+  outline: none;
+  border-color: rgba(255, 37, 58, 0.7);
+  box-shadow: 0 0 0 2px rgba(255, 37, 58, 0.2);
+}
+
+.admin-db-order-date-input::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  padding: 3px;
+}
+
 .admin-db-actions-cell {
   padding: 10px 12px;
 }

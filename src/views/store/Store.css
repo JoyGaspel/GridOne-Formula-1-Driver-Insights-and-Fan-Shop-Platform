@@ -1615,6 +1615,36 @@
   color: #4d5b77;
 }
 
+.order-timeline {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.order-timeline-item {
+  border: 1px solid #e3e9f3;
+  border-radius: 12px;
+  background: #f9fbff;
+  padding: 6px 10px;
+  display: grid;
+  gap: 2px;
+  color: #4d5b77;
+}
+
+.order-timeline-item span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.order-timeline-item strong {
+  color: #102047;
+  font-size: 12px;
+}
+
 .order-meta-grid {
   margin-top: 12px;
   display: grid;

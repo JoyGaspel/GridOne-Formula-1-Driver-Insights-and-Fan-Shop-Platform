@@ -22,6 +22,7 @@ export default function MiniStoreNavbar({
   onDepartmentSelect,
   activeDepartment,
   departments = [],
+  filters,
   cartCount,
   searchValue,
   onSearchChange,
@@ -235,6 +236,8 @@ export default function MiniStoreNavbar({
               </div>
             </div>
           )}
+
+          {filters ? <div className="mini-filter-bar">{filters}</div> : null}
         </div>
       </div>
     </nav>

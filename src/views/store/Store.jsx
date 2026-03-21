@@ -185,6 +185,12 @@ const buildOrderSummary = ({
     otpEmail: String(safeSummary.otpEmail ?? safeOtp.email ?? ""),
     otpVerifiedAt: String(safeSummary.otpVerifiedAt ?? safeOtp.verifiedAt ?? ""),
     otpTxId: String(safeSummary.otpTxId ?? safeOtp.txId ?? ""),
+    packedAt: String(safeSummary.packedAt ?? ""),
+    shippedAt: String(safeSummary.shippedAt ?? ""),
+    outForDeliveryAt: String(safeSummary.outForDeliveryAt ?? ""),
+    deliveredAt: String(safeSummary.deliveredAt ?? ""),
+    refundPendingAt: String(safeSummary.refundPendingAt ?? ""),
+    refundedAt: String(safeSummary.refundedAt ?? ""),
   };
 };
 
@@ -312,6 +318,62 @@ const getDeliveredAt = (order) => {
     return null;
   }
   return date;
+};
+
+const formatOrderTimelineDate = (value) => {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleDateString();
+};
+
+const formatStatusDate = (value) => {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleDateString("en-GB");
+};
+
+const getOrderStatusDisplay = (order) => {
+  const status = String(order?.orderStatus || "-");
+  const normalized = status.trim().toLowerCase();
+  const summary = order?.summary || {};
+  const statusDateMap = {
+    packed: summary.packedAt,
+    shipped: summary.shippedAt,
+    "out for delivery": summary.outForDeliveryAt,
+    delivered: summary.deliveredAt,
+    "refund pending": summary.refundPendingAt,
+    refunded: summary.refundedAt,
+  };
+  const formattedDate = formatStatusDate(statusDateMap[normalized]);
+  return formattedDate ? `${status} | ${formattedDate}` : status;
+};
+
+const getOrderTimelineEntries = (order) => {
+  const summary = order?.summary || {};
+  const entries = [
+    { key: "packedAt", label: "Packed", value: summary.packedAt },
+    { key: "shippedAt", label: "Shipped", value: summary.shippedAt },
+    { key: "outForDeliveryAt", label: "Out for Delivery", value: summary.outForDeliveryAt },
+    { key: "deliveredAt", label: "Delivered", value: summary.deliveredAt },
+    { key: "refundedAt", label: "Refunded", value: summary.refundedAt },
+  ];
+
+  return entries
+    .map((entry) => ({
+      ...entry,
+      display: formatOrderTimelineDate(entry.value),
+    }))
+    .filter((entry) => entry.display);
 };
 
 const canRefundOrder = (order) => {
@@ -2880,13 +2942,30 @@ export default function Store() {
                     </span>
                     <span className={`order-status-chip ${getStatusTone(order.orderStatus)}`}>
                       <span className="order-status-label">Order</span>
-                      <strong>{order.orderStatus}</strong>
+                      <strong>{getOrderStatusDisplay(order)}</strong>
                     </span>
                     <span className={`order-status-chip ${getStatusTone(order.deliveryStatus)}`}>
                       <span className="order-status-label">Delivery</span>
                       <strong>{order.deliveryStatus}</strong>
                     </span>
                   </div>
+
+                  {(() => {
+                    const timelineEntries = getOrderTimelineEntries(order);
+                    if (timelineEntries.length === 0) {
+                      return null;
+                    }
+                    return (
+                      <div className="order-timeline">
+                        {timelineEntries.map((entry) => (
+                          <div key={`${order.id}-${entry.key}`} className="order-timeline-item">
+                            <span>{entry.label}</span>
+                            <strong>{entry.display}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                   <div className="order-meta-grid">
                     <div className="order-meta-card">
