@@ -136,6 +136,7 @@ const MINISTORE_SECTION_PATHS = {
   [MGMT_STORE_CARTS_SECTION]: ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_CARTS,
 };
 const PRIMARY_SUPERADMIN_EMAIL = "gama.orgas.up@phinmaed.com";
+const HIDDEN_ADMIN_EMAILS = ["gama.orgas.up@gmail.com"];
 const STORE_ORDERS_TABLE = "store_orders";
 const STORE_CARTS_TABLE = "store_cart_items";
 const STORE_PRODUCTS_TABLE = "store_products";
@@ -184,6 +185,11 @@ function writeCachedList(key, value) {
 
 function isDataUrl(value) {
   return /^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(String(value || "").trim());
+}
+
+function normalizeAdminPath(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  return raw.endsWith("/") && raw.length > 1 ? raw.slice(0, -1) : raw;
 }
 
 function dataUrlToBlob(dataUrl) {
@@ -602,6 +608,53 @@ function normalizeStoreOrder(order) {
   };
 }
 
+function buildStoreOrderArchiveRecord(order) {
+  if (!order) {
+    return null;
+  }
+
+  const itemCount =
+    Number(order.itemCount || 0) ||
+    (Array.isArray(order.items)
+      ? order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+      : 0);
+  const summary = order.summary ?? {};
+
+  return {
+    dbId: order.dbId || null,
+    order_code: order.id || "",
+    user_id: order.userId || null,
+    items: Array.isArray(order.items) ? order.items : [],
+    item_count: itemCount,
+    total: Number(order.total || 0),
+    summary,
+    recipient_full_name: order.recipient?.fullName || "",
+    recipient_mobile: order.recipient?.mobile || "",
+    recipient_address: order.recipient?.address || "",
+    payment_method: order.paymentMethod || "GCash",
+    payment_status: order.paymentStatus || "Pending",
+    order_status: order.orderStatus || "Pending",
+    delivery_status: order.deliveryStatus || "Warehouse",
+    notes: order.notes || "",
+    created_at: order.createdAt || null,
+    updated_at: order.updatedAt || null,
+    otp_tx_id: summary.otpTxId || null,
+    otp_verified_at: summary.otpVerifiedAt || null,
+    otp_channel: summary.otpChannel || null,
+    otp_email: summary.otpEmail || null,
+  };
+}
+
+function canRestoreArchiveItem(item) {
+  if (!item) {
+    return false;
+  }
+  if (item.section === STORE_ORDERS_TABLE) {
+    return Boolean(item.recordData?.order_code);
+  }
+  return Boolean(sectionConfig[item.section] && item.recordData?.id);
+}
+
 function formatOrderSummaryForAdmin(summary) {
   const safeSummary =
     summary && typeof summary === "object" && !Array.isArray(summary) ? summary : {};
@@ -834,6 +887,7 @@ const AdminDashboard = () => {
   const [pendingImagePreview, setPendingImagePreview] = useState("");
   const [zoomImageSrc, setZoomImageSrc] = useState("");
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [pendingOrderDelete, setPendingOrderDelete] = useState(null);
   const [previewState, setPreviewState] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
@@ -1148,9 +1202,9 @@ const AdminDashboard = () => {
   }, [adminUser?.id]);
 
   useEffect(() => {
-    const path = location.pathname;
+    const path = normalizeAdminPath(location.pathname);
     const matched = Object.entries(MINISTORE_SECTION_PATHS).find(
-      ([, route]) => route.toLowerCase() === path.toLowerCase(),
+      ([, route]) => normalizeAdminPath(route) === path,
     );
 
     if (matched && matched[0] !== activeSection) {
@@ -1158,7 +1212,8 @@ const AdminDashboard = () => {
       return;
     }
 
-    if (!matched && path.toLowerCase() === ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE.toLowerCase()) {
+    const ministoreRoot = normalizeAdminPath(ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE);
+    if (!matched && (path === ministoreRoot || path.startsWith(`${ministoreRoot}/`))) {
       setActiveSection(MGMT_STORE_ORDERS_SECTION);
     }
   }, [location.pathname, activeSection]);
@@ -1736,20 +1791,24 @@ const AdminDashboard = () => {
     setActiveSection(section);
     const path = MINISTORE_SECTION_PATHS[section];
     if (path) {
-      if (location.pathname.toLowerCase() !== path.toLowerCase()) {
+      if (normalizeAdminPath(location.pathname) !== normalizeAdminPath(path)) {
         navigate(path);
       }
       return;
     }
 
-    if (location.pathname.toLowerCase() !== ROUTE_PATHS.ADMIN_DASHBOARD.toLowerCase()) {
+    if (normalizeAdminPath(location.pathname) !== normalizeAdminPath(ROUTE_PATHS.ADMIN_DASHBOARD)) {
       navigate(ROUTE_PATHS.ADMIN_DASHBOARD);
     }
   };
-  const regularAdmins = useMemo(
-    () => accessState.approvedAdmins.filter((admin) => admin.level !== "super admin"),
-    [accessState.approvedAdmins],
-  );
+  const regularAdmins = useMemo(() => {
+    const hidden = new Set(HIDDEN_ADMIN_EMAILS.map((email) => email.toLowerCase()));
+    return accessState.approvedAdmins.filter(
+      (admin) =>
+        admin.level !== "super admin" &&
+        !hidden.has(String(admin.email || "").trim().toLowerCase()),
+    );
+  }, [accessState.approvedAdmins]);
   const filteredRegularAdmins = useMemo(() => {
     if (!normalizedSearch) {
       return regularAdmins ?? [];
@@ -2122,6 +2181,45 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteStoreOrder = async (order) => {
+    if (!order?.id) {
+      return;
+    }
+
+    setError("");
+    const recordData = buildStoreOrderArchiveRecord(order);
+    if (!recordData) {
+      setError("Unable to archive order. Missing order data.");
+      return;
+    }
+
+    let error = null;
+    if (order.dbId) {
+      ({ error } = await supabase.from(STORE_ORDERS_TABLE).delete().eq("id", order.dbId));
+    } else {
+      ({ error } = await supabase.from(STORE_ORDERS_TABLE).delete().eq("order_code", order.id));
+    }
+
+    if (error) {
+      setError(error.message || "Unable to delete order.");
+      return;
+    }
+
+    const nextOrders = (storeOrders ?? []).filter((entry) => entry.id !== order.id);
+    setStoreOrders(nextOrders);
+    writeCachedList(STORE_ORDERS_CACHE_KEY, nextOrders);
+
+    const nextArchive = await addDeletedAction({
+      id: `${STORE_ORDERS_TABLE}-${order.id}-${Date.now()}`,
+      section: STORE_ORDERS_TABLE,
+      recordId: order.id,
+      recordName: order?.recipient?.fullName || order.id,
+      recordData,
+      at: new Date().toISOString(),
+    });
+    setArchive(nextArchive);
+  };
+
   const formatDateInputValue = (value) => {
     if (!value) {
       return "";
@@ -2400,6 +2498,28 @@ const AdminDashboard = () => {
     setPendingDelete(null);
   };
 
+  const openOrderDeleteConfirm = (order) => {
+    if (!order?.id) {
+      return;
+    }
+    setPendingOrderDelete({
+      id: order.id,
+      order,
+    });
+  };
+
+  const closeOrderDeleteConfirm = () => {
+    setPendingOrderDelete(null);
+  };
+
+  const confirmOrderDelete = async () => {
+    if (!pendingOrderDelete?.order) {
+      return;
+    }
+    await handleDeleteStoreOrder(pendingOrderDelete.order);
+    closeOrderDeleteConfirm();
+  };
+
   const confirmDelete = async () => {
     if (!pendingDelete?.id) {
       return;
@@ -2497,9 +2617,44 @@ const AdminDashboard = () => {
 
     const section = item.section;
     const recordData = item.recordData;
-    const canRestore = Boolean(sectionConfig[section] && recordData?.id);
+    const canRestore = Boolean(sectionConfig[section] && recordData?.id) || section === STORE_ORDERS_TABLE;
 
     if (canRestore) {
+      if (section === STORE_ORDERS_TABLE) {
+        const payload = {
+          user_id: recordData.user_id || null,
+          order_code: recordData.order_code || recordData.id || "",
+          items: Array.isArray(recordData.items) ? recordData.items : [],
+          item_count: Number(recordData.item_count || 0),
+          total: Number(recordData.total || 0),
+          summary: recordData.summary || {},
+          recipient_full_name: recordData.recipient_full_name || "",
+          recipient_mobile: recordData.recipient_mobile || "",
+          recipient_address: recordData.recipient_address || "",
+          payment_method: recordData.payment_method || "GCash",
+          payment_status: recordData.payment_status || "Pending",
+          order_status: recordData.order_status || "Pending",
+          delivery_status: recordData.delivery_status || "Warehouse",
+          notes: recordData.notes || "",
+          otp_tx_id: recordData.otp_tx_id || null,
+          otp_verified_at: recordData.otp_verified_at || null,
+          otp_channel: recordData.otp_channel || null,
+          otp_email: recordData.otp_email || null,
+          created_at: recordData.created_at || null,
+          updated_at: recordData.updated_at || null,
+        };
+
+        const { error: restoreError } = await supabase.from(STORE_ORDERS_TABLE).insert(payload);
+        if (restoreError) {
+          setError(restoreError.message || "Unable to restore store order.");
+          return;
+        }
+        void loadStoreData();
+        const nextArchive = await deleteArchiveActionById(item.id);
+        setArchive(nextArchive);
+        return;
+      }
+
       if (section === "products") {
         const { error: restoreError } = await supabase.rpc(ADMIN_UPSERT_STORE_PRODUCT_RPC, {
           p_product: {
@@ -3121,7 +3276,7 @@ const AdminDashboard = () => {
                   <span className="admin-db-nav-icon"><NavGlyph name="admins" /></span>
                   <span>Admins</span>
                   <span className="admin-db-nav-count">
-                    {accessState.approvedAdmins?.length ?? 0}
+                    {regularAdmins.length}
                   </span>
                 </button>
               )}
@@ -3365,7 +3520,7 @@ const AdminDashboard = () => {
                               <button
                                 type="button"
                                 onClick={() => handleArchiveRestore(item)}
-                                disabled={!sectionConfig[item.section] || !item.recordData?.id}
+                                disabled={!canRestoreArchiveItem(item)}
                               >
                                 Retrieve
                               </button>
@@ -3916,6 +4071,13 @@ const AdminDashboard = () => {
                               }
                               aria-label="Refunded date"
                             />
+                            <button
+                              type="button"
+                              className="danger"
+                              onClick={() => openOrderDeleteConfirm(order)}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </td>
                             </>
@@ -4546,6 +4708,27 @@ const AdminDashboard = () => {
               </button>
               <button type="button" className="admin-db-danger-btn" onClick={confirmDelete}>
                 Delete Permanently
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingOrderDelete && (
+        <div className="admin-db-modal" onClick={closeOrderDeleteConfirm}>
+          <div className="admin-db-modal-card admin-db-confirm-card" onClick={(event) => event.stopPropagation()}>
+            <h2>Archive Order</h2>
+            <p className="admin-db-confirm-text">
+              Archive order <strong>{pendingOrderDelete.id}</strong>? This will remove it from the orders list
+              and move it to the archive for retrieval.
+            </p>
+
+            <div className="admin-db-modal-actions">
+              <button type="button" onClick={closeOrderDeleteConfirm}>
+                Cancel
+              </button>
+              <button type="button" className="admin-db-danger-btn" onClick={confirmOrderDelete}>
+                Archive Order
               </button>
             </div>
           </div>

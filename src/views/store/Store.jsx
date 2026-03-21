@@ -3105,7 +3105,7 @@ export default function Store() {
               <div>
                 <p className="store-modal-kicker">GCash</p>
                 <h3>
-                  {paymentStep === "gateway" && "Thank you for your purchase!"}
+                  {paymentStep === "gateway" && "Order completed"}
                   {paymentStep === "login" && "Login to pay with GCash"}
                   {paymentStep === "otp" && "Authentication code"}
                   {paymentStep === "mpin" && "Enter MPIN"}
@@ -3257,7 +3257,7 @@ export default function Store() {
                 <div className="gcash-success-block">
                   <p className="gcash-success-title">Payment complete</p>
                   <p className="gcash-success">
-                    Thank you! You will receive an email confirmation as soon as we've validated your payment.
+                    Order completed. Thank you for shopping with us!
                   </p>
                 </div>
               )}
