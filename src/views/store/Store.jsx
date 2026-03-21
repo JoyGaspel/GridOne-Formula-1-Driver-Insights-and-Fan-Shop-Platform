@@ -440,6 +440,9 @@ const initialCheckout = {
 const DEPARTMENT_TABS = [
   { key: "Shop By Team", label: "By Team" },
   { key: "Shop By Driver", label: "By Driver" },
+  { key: "Jackets", label: "Jackets" },
+  { key: "Caps", label: "Caps" },
+  { key: "Shirts", label: "Shirts" },
   { key: "Men", label: "Men" },
   { key: "Women", label: "Women" },
   { key: "Kids", label: "Kids" },
@@ -511,6 +514,44 @@ export default function Store() {
   const isGoingBackRef = useRef(false);
   const lastDetailProductRef = useRef(null);
   const catalogScrollRef = useRef(0);
+
+  const CATEGORY_DEPARTMENTS = useMemo(
+    () =>
+      new Set([
+        "Men",
+        "Women",
+        "Kids",
+        "Headwear",
+        "Accessories",
+        "Collectibles",
+        "Jackets",
+        "Caps",
+        "Shirts",
+      ]),
+    []
+  );
+
+  const handleDepartmentSelect = useCallback(
+    (value) => {
+      runTransition(() => {
+        setActiveDepartment(value);
+        if (value === "Gifts & Accessories") {
+          setActiveCategory("Accessories");
+        } else if (CATEGORY_DEPARTMENTS.has(value)) {
+          setActiveCategory(value);
+        } else {
+          setActiveCategory("All");
+        }
+        if (value === "Shop By Driver") {
+          setActiveTeam("All Teams");
+        } else if (value === "Shop By Team") {
+          setActiveDriver("All Drivers");
+        }
+        goToView("catalog");
+      });
+    },
+    [CATEGORY_DEPARTMENTS, runTransition]
+  );
 
   const selectedAddress = useMemo(() => {
     if (!Array.isArray(savedAddresses) || savedAddresses.length === 0) {
@@ -2120,22 +2161,7 @@ export default function Store() {
           }}
           departments={DEPARTMENT_TABS}
           activeDepartment={activeDepartment}
-          onDepartmentSelect={(value) => {
-            runTransition(() => {
-              setActiveDepartment(value);
-              if (["Men", "Women", "Kids", "Headwear", "Accessories", "Collectibles"].includes(value)) {
-                setActiveCategory(value);
-              } else {
-                setActiveCategory("All");
-              }
-              if (value === "Shop By Driver") {
-                setActiveTeam("All Teams");
-              } else if (value === "Shop By Team") {
-                setActiveDriver("All Drivers");
-              }
-              goToView("catalog");
-            });
-          }}
+          onDepartmentSelect={handleDepartmentSelect}
           cartCount={cartCount}
           searchValue={query}
           onSearchChange={(value) => {
@@ -2145,6 +2171,26 @@ export default function Store() {
             });
           }}
         />
+
+        {view === "catalog" && (
+          <div className="store-catalog-dock" role="navigation" aria-label="Catalog departments">
+            <div className="store-catalog-dock-inner">
+              <span className="store-catalog-kicker">Catalog</span>
+              <div className="store-catalog-tabs">
+                {DEPARTMENT_TABS.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`catalog-department-btn ${activeDepartment === tab.key ? "active" : ""}`}
+                    onClick={() => handleDepartmentSelect(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {notice && <p className="store-notice">{notice}</p>}
 

@@ -173,17 +173,6 @@ export default function MiniStoreNavbar({
                   <path d="M5 9.5V20h14V9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              {onOpenFilters && (
-                <button
-                  type="button"
-                  className="mini-text-btn mini-catalog-btn"
-                  onClick={async () => {
-                    await onOpenFilters?.();
-                  }}
-                >
-                  Catalog
-                </button>
-              )}
               <button type="button" className="mini-icon-btn cart-btn" onClick={async () => { await onOpenCart?.(); }} aria-label="Cart">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M3 4h2l2.1 10.5h10.9l2-7.5H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

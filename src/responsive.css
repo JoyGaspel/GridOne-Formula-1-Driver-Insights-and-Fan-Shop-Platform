@@ -1,31 +1,49 @@
-:root {
-  --page-padding: clamp(16px, 3.5vw, 28px);
-  --card-padding: 1rem;
-  --text-scale: 1;
+/* =========================
+   GLOBAL RESET + BASE
+========================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  min-width: 0;
 }
 
-html[data-viewport="xs"] {
-  --page-padding: 14px;
-  --card-padding: 0.85rem;
-  --text-scale: 0.92;
-}
-
-html[data-viewport="sm"] {
-  --page-padding: 16px;
-  --card-padding: 0.95rem;
-  --text-scale: 0.96;
-}
-
-html[data-viewport="md"] {
-  --page-padding: 20px;
-  --card-padding: 1rem;
-  --text-scale: 1;
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 body {
+  font-family: sans-serif;
   line-height: 1.5;
-  font-size: calc(16px * var(--text-scale));
+  font-size: clamp(14px, 1.8vw, 16px);
 }
+
+/* =========================
+   VARIABLES
+========================= */
+
+:root {
+  --page-padding: 24px;
+  --card-padding: 1rem;
+  --gap: 1rem;
+}
+
+/* =========================
+   GLOBAL CONTAINER
+========================= */
+
+.container {
+  width: min(1200px, 100%);
+  margin: auto;
+  padding-inline: var(--page-padding);
+}
+
+/* =========================
+   MEDIA ELEMENTS
+========================= */
 
 img,
 video,
@@ -33,90 +51,144 @@ canvas,
 svg {
   max-width: 100%;
   height: auto;
+  display: block;
 }
 
-html[data-viewport="xs"] :where([class$="-main"], [class$="-page"], [class$="-layout"], main) {
-  padding-left: var(--page-padding);
-  padding-right: var(--page-padding);
+/* =========================
+   GRID SYSTEM (AUTO RESPONSIVE)
+========================= */
+
+.grid {
+  display: grid;
+  gap: var(--gap);
 }
 
-html[data-viewport="sm"] :where([class$="-main"], [class$="-page"], [class$="-layout"], main) {
-  padding-left: var(--page-padding);
-  padding-right: var(--page-padding);
+/* Cards layout (drivers, teams, shop, etc.) */
+.grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-html[data-viewport="xs"] .surface-card {
+/* Two column sections (hero, details) */
+.grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* =========================
+   RESPONSIVE BREAKPOINTS
+========================= */
+
+@media (max-width: 768px) {
+  :root {
+    --page-padding: 16px;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --page-padding: 12px;
+  }
+}
+
+/* =========================
+   CARD STYLES
+========================= */
+
+.card {
   padding: var(--card-padding);
+  border-radius: 12px;
+  background: #111;
+  color: white;
 }
 
-html[data-viewport="sm"] .surface-card {
-  padding: var(--card-padding);
-}
+/* =========================
+   DRIVER CARD FIX
+========================= */
 
-html[data-viewport="xs"] :where(
-    .detail-hero,
-    .detail-content-grid,
-    .race-weekend-section,
-    .race-weekend-details,
-    .calendar-grid,
-    .teams-grid,
-    .drivers-grid,
-    .circuits-grid,
-    .cards-schedule,
-    .cards-drivers,
-    .cards-teams,
-    .cards-circuits,
-    .store-showcase,
-    .store-catalog-layout,
-    .cart-layout,
-    .orders-layout,
-    .detail-layout,
-    .admin-db-layout,
-    .admin-db-super-grid,
-    .admin-db-account
-  ) {
-  grid-template-columns: 1fr !important;
-}
-
-html[data-viewport="sm"] :where(
-    .detail-hero,
-    .detail-content-grid,
-    .race-weekend-section,
-    .race-weekend-details,
-    .calendar-grid,
-    .teams-grid,
-    .drivers-grid,
-    .circuits-grid,
-    .cards-schedule,
-    .cards-drivers,
-    .cards-teams,
-    .cards-circuits,
-    .store-showcase,
-    .store-catalog-layout,
-    .cart-layout,
-    .orders-layout,
-    .detail-layout,
-    .admin-db-layout,
-    .admin-db-super-grid,
-    .admin-db-account
-  ) {
-  grid-template-columns: 1fr !important;
-}
-
-html[data-viewport="xs"] .navbar-collapse,
-html[data-viewport="xs"] .mini-collapse,
-html[data-viewport="sm"] .navbar-collapse,
-html[data-viewport="sm"] .mini-collapse {
-  max-height: calc(var(--vh, 1vh) * 100 - 68px);
-  overflow-y: auto;
-}
-
-html[data-viewport="xs"] :where(.navbar-links, .navbar-actions),
-html[data-viewport="sm"] :where(.navbar-links, .navbar-actions) {
+.driver-card img {
   width: 100%;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
-html[data-viewport="xs"] :where(.navbar-container, .mini-row),
-html[data-viewport="sm"] :where(.navbar-container, .mini-row) {
-  min-width: 0;
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.navbar-toggle {
+  display: none;
+  cursor: pointer;
+}
+
+/* MOBILE NAV */
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-links {
+    position: absolute;
+    top: 68px;
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    background: #000;
+    display: none;
+    padding: 1rem;
+  }
+
+  .navbar-links.active {
+    display: flex;
+  }
+}
+
+/* =========================
+   BUTTONS / INPUTS
+========================= */
+
+button,
+input,
+select,
+textarea {
+  font-size: 1rem;
+  max-width: 100%;
+}
+
+/* =========================
+   SECTION SPACING
+========================= */
+
+.section {
+  margin-block: 2rem;
+}
+
+/* =========================
+   FIX OVERFLOW ISSUES
+========================= */
+
+.flex {
+  display: flex;
+  gap: var(--gap);
+}
+
+@media (max-width: 768px) {
+  .flex {
+    flex-direction: column;
+  }
 }

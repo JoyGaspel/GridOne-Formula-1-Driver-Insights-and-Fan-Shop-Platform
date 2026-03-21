@@ -2,13 +2,15 @@
   position: relative;
   overflow: hidden;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   min-height: 322px;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--driver-accent, #dc0000) 96%, #ffffff) 0%,
-    color-mix(in srgb, var(--driver-accent, #dc0000) 82%, #111827) 100%
-  );
+  background:
+    radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.12), transparent 42%),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--driver-accent, #dc0000) 92%, #0b111b) 0%,
+      color-mix(in srgb, var(--driver-accent, #dc0000) 70%, #0b111b) 100%
+    );
   animation: cardRise 0.55s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   opacity: 0;
   transform: translateY(20px);
@@ -26,18 +28,18 @@
 
 .driver-card::before {
   left: 0;
-  right: 22%;
-  bottom: 92px;
-  height: 102px;
-  opacity: 0.34;
+  right: 12%;
+  bottom: 86px;
+  height: 120px;
+  opacity: 0.28;
 }
 
 .driver-card::after {
-  left: 34%;
+  left: 38%;
   right: 0;
-  bottom: 36px;
-  height: 62px;
-  opacity: 0.16;
+  bottom: 32px;
+  height: 70px;
+  opacity: 0.2;
 }
 
 @keyframes cardRise {
@@ -69,7 +71,7 @@
 
 .driver-name {
   margin: 0;
-  color: color-mix(in srgb, var(--driver-accent, #dc0000) 38%, #ffffff);
+  color: #ffffff;
   line-height: 0.95;
   font-size: clamp(1.95rem, 2.8vw, 3rem);
   text-transform: none;
@@ -79,16 +81,17 @@
 
 .driver-team {
   margin: 0.55rem 0 0;
-  color: color-mix(in srgb, var(--driver-accent, #dc0000) 26%, #ffffff);
-  font-size: 1.02rem;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.98rem;
   font-weight: 700;
 }
 
 .driver-number {
   margin: 1rem 0 0;
-  color: transparent;
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.96);
-  text-stroke: 2px rgba(255, 255, 255, 0.96);
+  color: #ffffff;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.85);
+  text-stroke: 1px rgba(255, 255, 255, 0.85);
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
   font-size: clamp(2.4rem, 6vw, 4rem);
   line-height: 1;
   font-weight: 900;
@@ -97,25 +100,26 @@
 
 .driver-image {
   position: absolute;
-  right: 0;
+  right: 2%;
   top: 0;
-  width: 46%;
+  width: 44%;
   min-width: 260px;
   max-width: 420px;
   height: 100%;
   overflow: hidden;
 }
 
-.driver-photo {
+.driver-card img.driver-photo {
   position: absolute;
-  right: -3%;
-  top: 0;
-  width: min(110%, 430px);
+  right: -6%;
+  top: -2%;
+  width: min(108%, 420px);
   max-width: none;
   height: auto;
   object-fit: contain;
   object-position: right top;
-  transform: scale(1.02) translateY(-2%);
+  border-radius: 0;
+  transform: scale(1.01);
   transform-origin: right top;
 }
 
@@ -144,12 +148,15 @@
   border: 2px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   background: rgba(255, 255, 255, 0.2);
+  z-index: 4;
 }
 
-.driver-flag img {
-  width: 100%;
-  height: 100%;
+.driver-card .driver-flag img {
+  width: 100% !important;
+  height: 100% !important;
   object-fit: cover;
+  border-radius: 0;
+  display: block;
 }
 
 @media (max-width: 768px) {
@@ -175,7 +182,7 @@
   }
 
   .driver-name {
-    font-size: 1.7rem;
+    font-size: 1.65rem;
   }
 
   .driver-team {
@@ -184,19 +191,19 @@
 
   .driver-number {
     margin-top: 0.84rem;
-    font-size: 2.9rem;
+    font-size: 2.8rem;
   }
 
   .driver-image {
-    width: 48%;
+    width: 46%;
     min-width: 220px;
   }
 
-  .driver-photo {
-    right: -5%;
-    top: 0;
-    width: min(112%, 360px);
-    transform: scale(1.01) translateY(-1%);
+  .driver-card img.driver-photo {
+    right: -7%;
+    top: -2%;
+    width: min(110%, 350px);
+    transform: scale(1);
   }
 
   .driver-flag {
@@ -231,13 +238,13 @@
   }
 
   .driver-image {
-    width: 44%;
+    width: 42%;
     min-width: 160px;
   }
 
-  .driver-photo {
-    right: -6%;
-    width: min(120%, 300px);
+  .driver-card img.driver-photo {
+    right: -8%;
+    width: min(112%, 290px);
   }
 
   .driver-flag {

@@ -11,6 +11,15 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
+/* Ensure global responsive styles don't override fixed positioning */
+.app-shell .navbar,
+body .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
 
 .navbar-container {
   width: min(1400px, calc(100% - 24px));
@@ -256,15 +265,15 @@
     padding-right: 0;
   }
 
-  .navbar-toggle-group {
+  .navbar .navbar-toggle-group {
     display: inline-flex;
   }
 
-  .navbar-toggle {
+  .navbar .navbar-toggle {
     display: inline-flex;
   }
 
-  .navbar-profile-toggle {
+  .navbar .navbar-profile-toggle {
     display: inline-flex;
   }
 
@@ -291,17 +300,22 @@
     display: flex;
   }
 
-  .navbar-links {
+  .navbar .navbar-collapse .navbar-links {
     margin: 0;
     gap: 12px;
     flex-direction: column;
     width: 100%;
+    position: static;
+    background: transparent;
+    padding: 0;
+    display: flex;
   }
 
-  .navbar-actions {
+  .navbar .navbar-collapse .navbar-actions {
     gap: 8px;
     flex-direction: column;
     width: 100%;
+    display: flex;
   }
   
   .navbar-title {

@@ -166,7 +166,7 @@
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.5);
   color: #ffffff;
-  display: none;
+  display: inline-flex;
 }
 
 .mini-search-toggle {

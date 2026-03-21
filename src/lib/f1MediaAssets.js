@@ -164,24 +164,65 @@ function buildTrackDetailedUrl(trackSlug) {
 }
 
 const countryCodeByNationality = {
+  Argentine: "ar",
+  Argentinian: "ar",
   Argentina: "ar",
+  Australian: "au",
   Australia: "au",
+  Austrian: "at",
+  Austria: "at",
+  Belgian: "be",
+  Belgium: "be",
+  Brazilian: "br",
   Brazil: "br",
+  British: "gb",
   Canada: "ca",
+  Canadian: "ca",
+  Chinese: "cn",
+  China: "cn",
   Colombia: "co",
+  Colombian: "co",
+  Danish: "dk",
+  Denmark: "dk",
+  Dutch: "nl",
   France: "fr",
+  French: "fr",
   Germany: "de",
+  German: "de",
   Italy: "it",
+  Italian: "it",
   Japan: "jp",
+  Japanese: "jp",
+  Mexican: "mx",
   Mexico: "mx",
   Monaco: "mc",
+  Monegasque: "mc",
+  "Mon\u00e9gasque": "mc",
   Netherlands: "nl",
+  "New Zealander": "nz",
   "New Zealand": "nz",
+  Polish: "pl",
+  Poland: "pl",
+  Portuguese: "pt",
+  Portugal: "pt",
+  Qatari: "qa",
+  Qatar: "qa",
+  Saudi: "sa",
+  "Saudi Arabian": "sa",
+  Singaporean: "sg",
+  Singapore: "sg",
   Spain: "es",
+  Spanish: "es",
+  Swedish: "se",
+  Sweden: "se",
   Thailand: "th",
+  Thai: "th",
   "Great Britain": "gb",
   "United Kingdom": "gb",
+  "United States": "us",
+  "United States of America": "us",
   Finland: "fi",
+  Finnish: "fi",
   USA: "us",
 };
 
@@ -203,7 +244,18 @@ export function resolveDriverImage(driver) {
 }
 
 export function getDriverFlagUrl(nationality) {
-  const code = countryCodeByNationality[String(nationality || "").trim()];
+  const raw = String(nationality || "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  const normalized = raw.replace(/\s+/g, " ").trim();
+  const directCode = normalized.toLowerCase();
+  if (/^[a-z]{2}$/i.test(directCode)) {
+    return `https://flagcdn.com/w80/${directCode}.png`;
+  }
+
+  const code = countryCodeByNationality[normalized];
   if (!code) {
     return "";
   }
