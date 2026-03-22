@@ -16,6 +16,7 @@ const Signup = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [existingUserEmail, setExistingUserEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -47,6 +48,7 @@ const Signup = () => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+    setExistingUserEmail("");
     setLoading(true);
 
     const trimmedFirstName = firstName.trim();
@@ -87,6 +89,25 @@ const Signup = () => {
     }
 
     try {
+      const { data: existingUsers, error: existingError } = await supabase
+        .from("admin_registered_users")
+        .select("id")
+        .eq("email", trimmedEmail)
+        .limit(1);
+
+      if (existingError) {
+        setError("Unable to verify existing accounts. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      if ((existingUsers ?? []).length > 0) {
+        setExistingUserEmail(trimmedEmail);
+        setError("An account with this email already exists. Please log in instead.");
+        setLoading(false);
+        return;
+      }
+
       // Signup using Supabase default SMTP (email OTP verification)
       const { error } = await supabase.auth.signUp({
         email: trimmedEmail,
@@ -102,8 +123,17 @@ const Signup = () => {
       });
 
       if (error) {
-        setError(error.message);
+        if (error.message?.toLowerCase().includes("already")) {
+          setExistingUserEmail(trimmedEmail);
+          setError("An account with this email already exists. Please log in instead.");
+        } else {
+          setError(error.message);
+        }
       } else {
+        localStorage.setItem(
+          "gridone_signup_fullname",
+          `${trimmedFirstName} ${trimmedLastName}`.trim(),
+        );
         void addRegisteredUser({
           id: `registered-${Date.now()}-${trimmedEmail}`,
           email: trimmedEmail,
@@ -195,9 +225,9 @@ const Signup = () => {
     <>
       <Navbar />
 
-      <div className="container">
-        <div className="background-overlay">
-          <div className="background-pattern"></div>
+      <div className="signup-page">
+        <div className="signup-background-overlay">
+          <div className="signup-background-pattern"></div>
         </div>
 
         <div className="signup-card">
@@ -240,7 +270,10 @@ const Signup = () => {
                 placeholder="Email"
                 className={`input-field${isEmailValid ? " is-valid" : ""}`}
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setExistingUserEmail("");
+                }}
                 required
               />
             </div>
@@ -302,6 +335,16 @@ const Signup = () => {
             </button>
 
             {error && <p className="signup-error">{error}</p>}
+            {existingUserEmail && (
+              <div className="login-redirect">
+                <p>
+                  {existingUserEmail} already has an account. Please log in instead.
+                </p>
+                <a className="login-redirect-button" href="/login">
+                  Go to Login
+                </a>
+              </div>
+            )}
             {successMessage && (
               <p className="signup-success">{successMessage}</p>
             )}
@@ -323,7 +366,7 @@ const Signup = () => {
           <div className="login-footer">
             <span> </span>
             <a href="/login" className="login-link">
-              Login!
+              Login
             </a>
             <span className="footer-separator">|</span>
             <a href="/forgotpass" className="forgot-link">

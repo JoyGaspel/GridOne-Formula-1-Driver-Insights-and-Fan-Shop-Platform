@@ -701,6 +701,19 @@ export default function Store() {
     }
   }, [location.pathname, location.search, location.state, navigate]);
 
+  useEffect(() => {
+    if (view !== "checkout") {
+      return;
+    }
+    if (!Array.isArray(savedAddresses) || savedAddresses.length === 0) {
+      setNotice("No saved address yet. Add one in My Account before placing an order.");
+      return;
+    }
+    if (notice === "No saved address yet. Add one in My Account before placing an order.") {
+      setNotice("");
+    }
+  }, [view, savedAddresses, notice]);
+
   const teamFilters = useMemo(() => {
     const base = Array.isArray(STORE_TEAMS) && STORE_TEAMS.length > 0 ? STORE_TEAMS : ["All Teams"];
     const normalizedActive = normalizeName(activeTeam);
@@ -2171,26 +2184,6 @@ export default function Store() {
             });
           }}
         />
-
-        {view === "catalog" && (
-          <div className="store-catalog-dock" role="navigation" aria-label="Catalog departments">
-            <div className="store-catalog-dock-inner">
-              <span className="store-catalog-kicker">Catalog</span>
-              <div className="store-catalog-tabs">
-                {DEPARTMENT_TABS.map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    className={`catalog-department-btn ${activeDepartment === tab.key ? "active" : ""}`}
-                    onClick={() => handleDepartmentSelect(tab.key)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {notice && <p className="store-notice">{notice}</p>}
 

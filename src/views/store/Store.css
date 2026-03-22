@@ -18,7 +18,7 @@
     radial-gradient(circle at 98% 6%, rgba(24, 95, 242, 0.08), transparent 34%),
     var(--store-bg);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  padding: 68px 0 36px;
+  padding: var(--ministore-nav-height, 68px) 0 36px;
 }
 
 .store-showcase,
@@ -36,7 +36,7 @@
 
 .store-catalog-dock {
   position: sticky;
-  top: 68px;
+  top: var(--ministore-nav-height, 68px);
   z-index: 1200;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);

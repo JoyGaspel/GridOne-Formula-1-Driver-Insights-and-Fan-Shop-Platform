@@ -189,6 +189,9 @@ export default function MyAccount() {
   const [barangayQuery, setBarangayQuery] = useState("");
   const [locationsLoading, setLocationsLoading] = useState(true);
   const [locationsError, setLocationsError] = useState("");
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState("");
+  const [geoMessage, setGeoMessage] = useState("");
   const [activeSection, setActiveSection] = useState("addresses");
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -217,10 +220,12 @@ export default function MyAccount() {
         currentUser.user_metadata?.full_name ||
         currentUser.user_metadata?.name ||
         "";
+      const signupName = localStorage.getItem("gridone_signup_fullname") || "";
+      const resolvedName = nameFromMeta || signupName;
 
       setUser(currentUser);
       setRole(resolvedRole);
-      setDisplayName(nameFromMeta);
+      setDisplayName(resolvedName);
       setNewEmail(currentUser.email || "");
       const primaryCart = parseArray(localStorage.getItem(CART_KEY));
       const legacyCart = parseArray(localStorage.getItem(CART_KEY_LEGACY));
@@ -233,11 +238,11 @@ export default function MyAccount() {
       const legacyAddress = parseStoredAddress(localStorage.getItem(ADDRESS_KEY));
       const localList = normalizeAddressList(
         storedAddresses.length > 0 ? storedAddresses : legacyAddress ? [legacyAddress] : [],
-        nameFromMeta,
+        resolvedName,
       );
       const defaultLocal = selectDefaultAddress(localList);
       setAddresses(localList);
-      setAddress(defaultLocal || normalizeAddress(emptyAddress, nameFromMeta));
+      setAddress(defaultLocal || normalizeAddress(emptyAddress, resolvedName));
       setActiveAddressId(defaultLocal?.id ?? null);
 
       if (resolvedRole !== "admin") {
@@ -263,8 +268,8 @@ export default function MyAccount() {
 
         if (!addressError && Array.isArray(addressRows)) {
           const dbAddresses = normalizeAddressList(
-            addressRows.map((row) => mapAddressRow(row, nameFromMeta)),
-            nameFromMeta,
+            addressRows.map((row) => mapAddressRow(row, resolvedName)),
+            resolvedName,
           );
           const defaultAddress = selectDefaultAddress(dbAddresses);
           setAddresses(dbAddresses);
@@ -308,9 +313,25 @@ export default function MyAccount() {
   const filteredProvinces = provinces.filter((item) =>
     item.name.toLowerCase().includes(provinceQuery.trim().toLowerCase()),
   );
-  const filteredLocalities = localities.filter((item) =>
-    item.name.toLowerCase().includes(cityQuery.trim().toLowerCase()),
-  );
+  const normalizeSearchText = (value) =>
+    String(value || "")
+      .toLowerCase()
+      .replace(/\b(city of|municipality of|city|municipality|mun\.?)\b/g, "")
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  const rawCityQuery = cityQuery.trim().toLowerCase();
+  const normalizedCityQuery = normalizeSearchText(cityQuery);
+  const filteredLocalities = localities.filter((item) => {
+    const rawName = item.name.toLowerCase();
+    if (rawCityQuery && rawName.includes(rawCityQuery)) {
+      return true;
+    }
+    if (!normalizedCityQuery) {
+      return true;
+    }
+    return normalizeSearchText(item.name).includes(normalizedCityQuery);
+  });
   const filteredBarangays = barangays.filter((item) =>
     item.toLowerCase().includes(barangayQuery.trim().toLowerCase()),
   );
@@ -558,6 +579,140 @@ export default function MyAccount() {
     }));
   };
 
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoError("Geolocation is not supported in this browser.");
+      return;
+    }
+
+    setGeoLoading(true);
+    setGeoError("");
+    setGeoMessage("");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`,
+          );
+          if (!response.ok) {
+            throw new Error("Reverse geocoding failed");
+          }
+          const payload = await response.json();
+          const info = payload?.address || {};
+
+          const pickFirst = (...values) =>
+            values.find((value) => String(value || "").trim().length > 0) || "";
+
+          const regionValue = pickFirst(info.region, info.state);
+          const provinceValue = pickFirst(info.province, info.state_district, info.county, info.state);
+          const cityValue = pickFirst(info.city, info.town, info.municipality, info.city_district);
+          const barangayValue = pickFirst(
+            info.suburb,
+            info.neighbourhood,
+            info.village,
+            info.hamlet,
+          );
+          const streetValue = [info.house_number, info.road].filter(Boolean).join(" ").trim();
+          const postalValue = pickFirst(info.postcode);
+
+          const normalizedRegion = normalizeSearchText(regionValue);
+          const normalizedProvince = normalizeSearchText(provinceValue || regionValue);
+          const normalizedCity = normalizeSearchText(cityValue);
+
+          const findByName = (list, needle) => {
+            if (!needle) return null;
+            const exact = list.find(
+              (item) => normalizeSearchText(item.name) === needle,
+            );
+            if (exact) return exact;
+            return (
+              list.find((item) =>
+                normalizeSearchText(item.name).includes(needle),
+              ) || null
+            );
+          };
+
+          const allRegions = regions.length > 0 ? regions : await fetchRegions();
+          const matchedRegion = findByName(allRegions, normalizedRegion);
+
+          const nextRegionCode = matchedRegion?.code || "";
+          let nextProvinceCode = "";
+          let nextCityCode = "";
+          let provinceList = [];
+          let localityList = [];
+
+          if (nextRegionCode) {
+            provinceList = await fetchProvinces(nextRegionCode);
+            setProvinces(provinceList);
+            const matchedProvince = findByName(provinceList, normalizedProvince);
+            nextProvinceCode = matchedProvince?.code || "";
+
+            if (nextProvinceCode) {
+              localityList = await fetchLocalities({
+                regionCode: nextRegionCode,
+                provinceCode: nextProvinceCode,
+              });
+              setLocalities(localityList);
+              const matchedCity = findByName(localityList, normalizedCity);
+              nextCityCode = matchedCity?.code || "";
+            } else {
+              setLocalities([]);
+            }
+          } else {
+            setProvinces([]);
+            setLocalities([]);
+          }
+
+          const resolvedRegionName = matchedRegion?.name || regionValue;
+          const resolvedProvinceName =
+            provinceList.find((p) => p.code === nextProvinceCode)?.name ||
+            (provinceValue || regionValue);
+          const resolvedCityName =
+            localityList.find((c) => c.code === nextCityCode)?.name || cityValue;
+
+          setAddress((currentAddress) => ({
+            ...currentAddress,
+            country: "Philippines",
+            region: resolvedRegionName,
+            regionCode: nextRegionCode,
+            province: resolvedProvinceName,
+            provinceCode: nextProvinceCode,
+            city: resolvedCityName,
+            cityCode: nextCityCode,
+            barangay: barangayValue,
+            postalCode: postalValue,
+            streetAddress: streetValue || currentAddress.streetAddress,
+          }));
+
+          setRegionQuery(resolvedRegionName);
+          setProvinceQuery(resolvedProvinceName);
+          setCityQuery(resolvedCityName);
+          setBarangayQuery(barangayValue);
+
+          if (nextCityCode) {
+            const barangayList = await fetchBarangays(nextCityCode);
+            setBarangays(barangayList);
+          } else {
+            setBarangays([]);
+          }
+          setGeoMessage("Location detected. Please review the fields before saving.");
+        } catch {
+          setGeoError("Unable to fetch address from your location.");
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      () => {
+        setGeoLoading(false);
+        setGeoError("Location permission denied. Please allow access to use GPS.");
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+    );
+  };
+
   const handleSelectAddress = (selected) => {
     if (!selected) {
       return;
@@ -566,6 +721,47 @@ export default function MyAccount() {
     setActiveAddressId(selected.id ?? null);
     setMessage("");
     setError("");
+  };
+
+  const handleDeleteAddress = async (selected) => {
+    if (!selected) {
+      return;
+    }
+    if (selected.isDefault) {
+      setError("Default address cannot be deleted. Set another address as default first.");
+      return;
+    }
+
+    setMessage("");
+    setError("");
+
+    try {
+      if (user?.id && selected.id && !String(selected.id).startsWith("local-")) {
+        const { error: deleteError } = await supabase
+          .from(ADDRESS_TABLE)
+          .delete()
+          .eq("id", selected.id);
+
+        if (deleteError) {
+          setError(deleteError.message || "Unable to delete address.");
+          return;
+        }
+      }
+
+      const nextAddresses = addresses.filter((item) => item.id !== selected.id);
+      const normalizedNext = normalizeAddressList(nextAddresses, displayName);
+      const nextDefault =
+        selectDefaultAddress(normalizedNext) || normalizeAddress(emptyAddress, displayName);
+
+      setAddresses(normalizedNext);
+      setAddress(nextDefault);
+      setActiveAddressId(nextDefault?.id ?? null);
+      localStorage.setItem(ADDRESS_KEY, JSON.stringify(nextDefault));
+      localStorage.setItem(ADDRESS_LIST_KEY, JSON.stringify(normalizedNext));
+      setMessage("Address removed.");
+    } catch (err) {
+      setError(err?.message || "Unable to delete address.");
+    }
   };
 
   const handleAddNewAddress = () => {
@@ -632,19 +828,19 @@ export default function MyAccount() {
   };
 
   const handleRegionSelect = (event) => {
-    const nextCode = event.target.value;
-    const selectedRegion = regions.find((item) => item.code === nextCode);
+    const nextName = event.target.value;
+    const selectedRegion = regions.find((item) => item.name === nextName);
 
     setLocationsError("");
-    setRegionQuery(selectedRegion?.name || "");
+    setRegionQuery(nextName);
     setProvinceQuery("");
     setCityQuery("");
     setBarangayQuery("");
     setAddress((currentAddress) => ({
       ...currentAddress,
       country: "Philippines",
-      regionCode: nextCode,
-      region: selectedRegion?.name || "",
+      regionCode: selectedRegion?.code || "",
+      region: nextName,
       provinceCode: "",
       province: "",
       cityCode: "",
@@ -656,17 +852,17 @@ export default function MyAccount() {
 
 
   const handleProvinceSelect = (event) => {
-    const nextCode = event.target.value;
-    const selectedProvince = provinces.find((item) => item.code === nextCode);
+    const nextName = event.target.value;
+    const selectedProvince = provinces.find((item) => item.name === nextName);
 
     setLocationsError("");
-    setProvinceQuery(selectedProvince?.name || "");
+    setProvinceQuery(nextName);
     setCityQuery("");
     setBarangayQuery("");
     setAddress((currentAddress) => ({
       ...currentAddress,
-      provinceCode: nextCode,
-      province: selectedProvince?.name || "",
+      provinceCode: selectedProvince?.code || "",
+      province: nextName,
       cityCode: "",
       city: "",
       barangay: "",
@@ -676,16 +872,16 @@ export default function MyAccount() {
 
 
   const handleLocalitySelect = (event) => {
-    const nextCode = event.target.value;
-    const selectedLocality = localities.find((item) => item.code === nextCode);
+    const nextName = event.target.value;
+    const selectedLocality = localities.find((item) => item.name === nextName);
 
     setLocationsError("");
-    setCityQuery(selectedLocality?.name || "");
+    setCityQuery(nextName);
     setBarangayQuery("");
     setAddress((currentAddress) => ({
       ...currentAddress,
-      cityCode: nextCode,
-      city: selectedLocality?.name || "",
+      cityCode: selectedLocality?.code || "",
+      city: nextName,
       barangay: "",
       postalCode: selectedLocality?.postalCode || currentAddress.postalCode,
     }));
@@ -742,107 +938,122 @@ export default function MyAccount() {
     setMessage("");
     setError("");
 
-    let cleanedAddress = normalizeAddress(address, displayName);
+    try {
+      let cleanedAddress = normalizeAddress(address, displayName);
 
-    if (!isAddressComplete(cleanedAddress)) {
-      setError("Complete all address fields before saving.");
-      setSavingAddress(false);
-      return;
-    }
-
-    if (cleanedAddress.usePhoneNumberForGcash && cleanedAddress.phoneNumber.trim().length < 10) {
-      setError("Enter a valid phone number before marking it as your GCash number.");
-      setSavingAddress(false);
-      return;
-    }
-
-    const isEditing = Boolean(
-      cleanedAddress.id && addresses.some((item) => item.id === cleanedAddress.id),
-    );
-    if (!isEditing && addresses.length >= 3) {
-      setError("You can only save up to 3 addresses.");
-      setSavingAddress(false);
-      return;
-    }
-
-    if (!addresses.some((item) => item.isDefault) && !cleanedAddress.isDefault) {
-      cleanedAddress = { ...cleanedAddress, isDefault: true };
-    }
-
-    const shouldUseDatabase = !isAdmin && user?.id;
-    let saveError = null;
-    let savedRow = null;
-
-    if (shouldUseDatabase) {
-      if (cleanedAddress.isDefault) {
-        await supabase
-          .from(ADDRESS_TABLE)
-          .update({ is_default: false })
-          .eq("user_id", user.id);
+      if (!isAddressComplete(cleanedAddress)) {
+        setError("Complete all address fields before saving.");
+        return;
       }
 
-      const payload = {
-        user_id: user.id,
-        ...buildAddressPayload(cleanedAddress),
-      };
-
-      if (isEditing && !String(cleanedAddress.id || "").startsWith("local-")) {
-        const { data, error: updateError } = await supabase
-          .from(ADDRESS_TABLE)
-          .update(payload)
-          .eq("id", cleanedAddress.id)
-          .select("*")
-          .single();
-
-        saveError = updateError;
-        savedRow = data || null;
-      } else {
-        const { data, error: insertError } = await supabase
-          .from(ADDRESS_TABLE)
-          .insert(payload)
-          .select("*")
-          .single();
-
-        saveError = insertError;
-        savedRow = data || null;
+      if (cleanedAddress.usePhoneNumberForGcash && cleanedAddress.phoneNumber.trim().length < 10) {
+        setError("Enter a valid phone number before marking it as your GCash number.");
+        return;
       }
-    }
 
-    if (saveError) {
-      setError(saveError.message || "Unable to save address.");
+      const isEditing = Boolean(
+        cleanedAddress.id && addresses.some((item) => item.id === cleanedAddress.id),
+      );
+      if (!isEditing && addresses.length >= 3) {
+        setError("You can only save up to 3 addresses.");
+        return;
+      }
+
+      if (!addresses.some((item) => item.isDefault) && !cleanedAddress.isDefault) {
+        cleanedAddress = { ...cleanedAddress, isDefault: true };
+      }
+
+      const shouldUseDatabase = !isAdmin && user?.id;
+      let saveError = null;
+      let savedRow = null;
+
+      if (shouldUseDatabase) {
+        if (cleanedAddress.isDefault) {
+          await supabase
+            .from(ADDRESS_TABLE)
+            .update({ is_default: false })
+            .eq("user_id", user.id);
+        }
+
+        const payload = {
+          user_id: user.id,
+          ...buildAddressPayload(cleanedAddress),
+        };
+
+        if (isEditing && !String(cleanedAddress.id || "").startsWith("local-")) {
+          const { data, error: updateError } = await supabase
+            .from(ADDRESS_TABLE)
+            .update(payload)
+            .eq("id", cleanedAddress.id)
+            .select("*")
+            .single();
+
+          saveError = updateError;
+          savedRow = data || null;
+        } else {
+          const { data, error: insertError } = await supabase
+            .from(ADDRESS_TABLE)
+            .insert(payload)
+            .select("*")
+            .single();
+
+          saveError = insertError;
+          savedRow = data || null;
+        }
+      }
+
+      if (saveError) {
+        const message = saveError.message || "Unable to save address.";
+        const isDuplicateKey = message.toLowerCase().includes("duplicate key");
+        if (!isDuplicateKey) {
+          setError(message);
+          return;
+        }
+        // If the DB enforces a single address per user, keep the new address locally.
+        if (!cleanedAddress.id) {
+          cleanedAddress = { ...cleanedAddress, id: `local-${Date.now()}` };
+        }
+        saveError = null;
+        savedRow = null;
+      }
+
+      const resolvedAddress = savedRow
+        ? mapAddressRow(savedRow, displayName)
+        : cleanedAddress;
+
+      const nextAddresses = (() => {
+        const base = addresses.map((item) => ({
+          ...item,
+          isDefault: resolvedAddress.isDefault ? false : item.isDefault,
+        }));
+
+        const matchIndex = base.findIndex((item) => item.id === resolvedAddress.id);
+        if (matchIndex >= 0) {
+          const updated = [...base];
+          updated[matchIndex] = resolvedAddress;
+          return updated;
+        }
+        return [...base, resolvedAddress];
+      })();
+
+      const normalizedNext = normalizeAddressList(nextAddresses, displayName);
+      const defaultAddress = selectDefaultAddress(normalizedNext) || resolvedAddress;
+
+      setAddresses(normalizedNext);
+      setAddress(resolvedAddress);
+      setActiveAddressId(resolvedAddress.id ?? null);
+      localStorage.setItem(ADDRESS_KEY, JSON.stringify(defaultAddress));
+      localStorage.setItem(ADDRESS_LIST_KEY, JSON.stringify(normalizedNext));
+      setMessage(
+        savedRow
+          ? "Address saved for faster checkout."
+          : "Address saved locally for faster checkout.",
+      );
+    } catch (err) {
+      setError(err?.message || "Unable to save address.");
+    } finally {
       setSavingAddress(false);
-      return;
     }
-
-    const resolvedAddress = savedRow
-      ? mapAddressRow(savedRow, displayName)
-      : cleanedAddress;
-
-    const nextAddresses = (() => {
-      const base = addresses.map((item) => ({
-        ...item,
-        isDefault: resolvedAddress.isDefault ? false : item.isDefault,
-      }));
-
-      const matchIndex = base.findIndex((item) => item.id === resolvedAddress.id);
-      if (matchIndex >= 0) {
-        const updated = [...base];
-        updated[matchIndex] = resolvedAddress;
-        return updated;
-      }
-      return [...base, resolvedAddress];
-    })();
-
-    const normalizedNext = normalizeAddressList(nextAddresses, displayName);
-    const defaultAddress = selectDefaultAddress(normalizedNext) || resolvedAddress;
-
-    setAddresses(normalizedNext);
-    setAddress(resolvedAddress);
-    setActiveAddressId(resolvedAddress.id ?? null);
-    localStorage.setItem(ADDRESS_KEY, JSON.stringify(defaultAddress));
-    localStorage.setItem(ADDRESS_LIST_KEY, JSON.stringify(normalizedNext));
-    setMessage("Address saved for faster checkout.");
-    setSavingAddress(false);
   };
 
   const handlePasswordSave = async (event) => {
@@ -1133,6 +1344,15 @@ export default function MyAccount() {
                               Set default
                             </button>
                           ) : null}
+                          {!saved.isDefault ? (
+                            <button
+                              type="button"
+                              className="account-btn danger"
+                              onClick={() => handleDeleteAddress(saved)}
+                            >
+                              Delete
+                            </button>
+                          ) : null}
                         </div>
                       </div>
                     ))}
@@ -1188,6 +1408,16 @@ export default function MyAccount() {
                     <div>
                       <p className="field-label">Location selected</p>
                       <p className="address-selection-country">PSGC hierarchy: Region, Province, City or Municipality, Barangay, ZIP code</p>
+                      <button
+                        type="button"
+                        className="address-gps-btn"
+                        onClick={handleUseLocation}
+                        disabled={geoLoading || locationsLoading}
+                      >
+                        {geoLoading ? "Detecting location..." : "Use my location"}
+                      </button>
+                      {geoMessage && <p className="address-gps-message">{geoMessage}</p>}
+                      {geoError && <p className="address-gps-error">{geoError}</p>}
                     </div>
                     <button
                       type="button"
@@ -1244,13 +1474,13 @@ export default function MyAccount() {
                 <select
                   id="addressRegion"
                   className="field-input"
-                  value={address.regionCode}
+                  value={address.region}
                   onChange={handleRegionSelect}
                   disabled={locationsLoading}
                 >
                   <option value="">{locationsLoading ? "Loading regions..." : "Select region"}</option>
                   {filteredRegions.map((item) => (
-                    <option key={item.code} value={item.code}>
+                    <option key={item.code} value={item.name}>
                       {item.name}
                     </option>
                   ))}
@@ -1270,7 +1500,7 @@ export default function MyAccount() {
                 <select
                   id="addressProvince"
                   className="field-input"
-                  value={address.provinceCode}
+                  value={address.province}
                   onChange={handleProvinceSelect}
                   disabled={!address.regionCode || provinces.length === 0}
                 >
@@ -1284,7 +1514,7 @@ export default function MyAccount() {
                         : "Select province"}
                   </option>
                   {filteredProvinces.map((item) => (
-                    <option key={item.code} value={item.code}>
+                    <option key={item.code} value={item.name}>
                       {item.name}
                     </option>
                   ))}
@@ -1301,7 +1531,7 @@ export default function MyAccount() {
                         onClick={() => {
                           setRegionQuery(item.regionName);
                           setProvinceQuery(item.name);
-                          handleRegionSelect({ target: { value: item.regionCode } });
+                          handleRegionSelect({ target: { value: item.regionName } });
                         }}
                       >
                         <span className="address-hint-name">{item.name}</span>
@@ -1325,7 +1555,7 @@ export default function MyAccount() {
                 <select
                   id="addressCity"
                   className="field-input"
-                  value={address.cityCode}
+                  value={address.city}
                   onChange={handleLocalitySelect}
                   disabled={!address.regionCode || localities.length === 0}
                 >
@@ -1334,10 +1564,10 @@ export default function MyAccount() {
                       ? "Select a region first"
                       : filteredLocalities.length === 0
                         ? "No matching city or municipality"
-                      : "Select city or municipality"}
+                        : "Select city or municipality"}
                   </option>
                   {filteredLocalities.map((item) => (
-                    <option key={item.code} value={item.code}>
+                    <option key={item.code} value={item.name}>
                       {item.name}
                     </option>
                   ))}
@@ -1434,6 +1664,8 @@ export default function MyAccount() {
                 <button type="submit" className="account-btn primary" disabled={savingAddress}>
                   {savingAddress ? "Saving..." : "Save address"}
                 </button>
+                {error && <p className="address-error-inline">{error}</p>}
+                {message && <p className="address-success-inline">{message}</p>}
                 </form>
               </article>
             )}

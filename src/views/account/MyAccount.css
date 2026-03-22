@@ -537,6 +537,34 @@ select.field-input option {
   line-height: 1.4;
 }
 
+.address-gps-btn {
+  margin-top: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(27, 31, 40, 0.95);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.address-gps-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.address-gps-message {
+  margin: 0.45rem 0 0;
+  color: #b9f1cf;
+  font-size: 0.85rem;
+}
+
+.address-gps-error {
+  margin: 0.45rem 0 0;
+  color: #ff9d9d;
+  font-size: 0.85rem;
+}
+
 .address-reset-btn {
   border: 0;
   background: transparent;
@@ -684,6 +712,12 @@ select.field-input option {
 
 .address-error-inline {
   color: #ff9d9d;
+}
+
+.address-success-inline {
+  margin: 0;
+  color: #9ef0c2;
+  font-size: 0.84rem;
 }
 
 .address-meta-panel {

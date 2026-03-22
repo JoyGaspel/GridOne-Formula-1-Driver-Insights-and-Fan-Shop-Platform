@@ -1,10 +1,20 @@
 const DATA_BASE = "/psgc";
 const PSGC_LIST_FILE = `${DATA_BASE}/psgc-list.json`;
+const REGIONS_FILE = `${DATA_BASE}/regions.json`;
+const PROVINCES_FILE = `${DATA_BASE}/provinces.json`;
+const LOCALITIES_FILE = `${DATA_BASE}/localities.json`;
+const BARANGAYS_FILE = `${DATA_BASE}/barangays-by-city.json`;
 
 const regionsCache = { value: null };
 const provincesCache = new Map();
 const localitiesCache = new Map();
 const barangaysCache = new Map();
+const jsonCache = {
+  regions: null,
+  provinces: null,
+  localities: null,
+  barangaysByCity: null,
+};
 const dataCache = {
   list: null,
   derived: null,
@@ -23,6 +33,50 @@ async function loadPsgcList() {
   const data = await response.json();
   dataCache.list = Array.isArray(data) ? data : [];
   return dataCache.list;
+}
+
+async function loadJsonFile(path) {
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new Error(`Location lookup failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+async function loadRegionsFile() {
+  if (jsonCache.regions) {
+    return jsonCache.regions;
+  }
+  const data = await loadJsonFile(REGIONS_FILE);
+  jsonCache.regions = Array.isArray(data) ? data : [];
+  return jsonCache.regions;
+}
+
+async function loadProvincesFile() {
+  if (jsonCache.provinces) {
+    return jsonCache.provinces;
+  }
+  const data = await loadJsonFile(PROVINCES_FILE);
+  jsonCache.provinces = Array.isArray(data) ? data : [];
+  return jsonCache.provinces;
+}
+
+async function loadLocalitiesFile() {
+  if (jsonCache.localities) {
+    return jsonCache.localities;
+  }
+  const data = await loadJsonFile(LOCALITIES_FILE);
+  jsonCache.localities = Array.isArray(data) ? data : [];
+  return jsonCache.localities;
+}
+
+async function loadBarangaysByCityFile() {
+  if (jsonCache.barangaysByCity) {
+    return jsonCache.barangaysByCity;
+  }
+  const data = await loadJsonFile(BARANGAYS_FILE);
+  jsonCache.barangaysByCity = data && typeof data === "object" ? data : {};
+  return jsonCache.barangaysByCity;
 }
 
 function normalizeName(value) {
@@ -147,9 +201,16 @@ export async function fetchRegions() {
     return regionsCache.value;
   }
 
-  const data = await getDerivedData();
-  regionsCache.value = data.regions;
-  return data.regions;
+  const data = await loadRegionsFile();
+  const normalized = data
+    .map((row) => ({
+      code: String(row.code || ""),
+      name: normalizeName(row.name),
+    }))
+    .filter((row) => row.code && row.name)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  regionsCache.value = normalized;
+  return normalized;
 }
 
 export async function fetchProvinces(regionCode) {
@@ -162,8 +223,8 @@ export async function fetchProvinces(regionCode) {
     return provincesCache.get(safeRegionCode);
   }
 
-  const data = await getDerivedData();
-  const normalized = data.provinces
+  const data = await loadProvincesFile();
+  const normalized = data
     .filter((row) => String(row.regionCode || "").trim() === safeRegionCode)
     .map((row) => ({
       code: String(row.code || ""),
@@ -188,8 +249,8 @@ export async function fetchLocalities({ regionCode, provinceCode }) {
     return [];
   }
 
-  const data = await getDerivedData();
-  const normalized = data.localities
+  const data = await loadLocalitiesFile();
+  const normalized = data
     .filter((row) => {
       if (safeProvinceCode) {
         return String(row.provinceCode || "").trim() === safeProvinceCode;
@@ -199,7 +260,7 @@ export async function fetchLocalities({ regionCode, provinceCode }) {
     .map((row) => ({
       code: String(row.code || ""),
       name: normalizeName(row.name),
-      postalCode: String(row.postalCode || "").trim(),
+      level: row.level,
     }))
     .filter((row) => row.code && row.name);
 
@@ -217,8 +278,8 @@ export async function fetchBarangays(localityCode) {
     return barangaysCache.get(safeLocalityCode);
   }
 
-  const data = await getDerivedData();
-  const list = data.barangaysByCity[safeLocalityCode] || [];
+  const data = await loadBarangaysByCityFile();
+  const list = data[safeLocalityCode] || [];
   const normalized = (Array.isArray(list) ? list : [])
     .map((row) => normalizeName(row))
     .filter(Boolean)

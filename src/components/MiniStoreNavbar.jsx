@@ -32,6 +32,7 @@ export default function MiniStoreNavbar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef(null);
+  const navRef = useRef(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -56,6 +57,35 @@ export default function MiniStoreNavbar({
     };
   }, []);
 
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    const updateHeight = () => {
+      const height = nav.offsetHeight || 0;
+      if (height > 0) {
+        document.documentElement.style.setProperty(
+          "--ministore-nav-height",
+          `${height}px`,
+        );
+      }
+    };
+
+    updateHeight();
+    let observer = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => updateHeight());
+      observer.observe(nav);
+    } else {
+      window.addEventListener("resize", updateHeight);
+    }
+
+    return () => {
+      observer?.disconnect?.();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [menuOpen, searchOpen, departments.length, filters, user, role]);
+
   const handleSearchToggle = () => {
     setSearchOpen((prev) => {
       const next = !prev;
@@ -70,7 +100,10 @@ export default function MiniStoreNavbar({
   };
 
   return (
-    <nav className={`ministore-navbar ${searchOpen ? "search-open" : ""}`}>
+    <nav
+      ref={navRef}
+      className={`ministore-navbar ${searchOpen ? "search-open" : ""}`}
+    >
       <div className="mini-row">
         <div className="mini-brand-wrap">
           <Link to={ROUTE_PATHS.LANDING} className="mini-brand-link" aria-label="Go to landing page">
