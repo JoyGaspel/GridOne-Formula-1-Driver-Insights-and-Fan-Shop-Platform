@@ -1,27 +1,33 @@
 .loading-screen {
-  min-height: 40vh;
+  min-height: 30vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   text-align: center;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1.5rem;
+  animation: loadingFadeIn 0.25s ease-out;
 }
 
 .loading-screen-compact {
-  min-height: 18rem;
+  min-height: 12rem;
 }
 
 .loading-screen-gif {
-  width: min(180px, 48vw);
+  width: min(120px, 36vw);
   height: auto;
   object-fit: contain;
 }
 
 .loading-screen-text {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+@keyframes loadingFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

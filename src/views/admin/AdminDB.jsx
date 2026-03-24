@@ -157,6 +157,9 @@ const ADMIN_DELETE_STORE_PRODUCT_RPC = "admin_delete_store_product";
 const ADMIN_LIST_STORE_DISCOUNTS_RPC = "admin_list_store_discounts";
 const ADMIN_UPSERT_STORE_DISCOUNT_RPC = "admin_upsert_store_discount";
 const ADMIN_DELETE_STORE_DISCOUNT_RPC = "admin_delete_store_discount";
+const ADMIN_SUSPEND_AUTH_USER_RPC = "admin_suspend_auth_user";
+const ADMIN_DELETE_AUTH_USER_RPC = "admin_delete_auth_user";
+const USERS_SECTION_KEY = "users";
 const STORE_ORDERS_CACHE_KEY = "gridone_admin_store_orders_v1";
 const STORE_CARTS_CACHE_KEY = "gridone_admin_store_carts_v1";
 const STORE_PRODUCTS_CACHE_KEY = "gridone_admin_store_products_v1";
@@ -652,6 +655,9 @@ function canRestoreArchiveItem(item) {
   if (item.section === STORE_ORDERS_TABLE) {
     return Boolean(item.recordData?.order_code);
   }
+  if (item.section === USERS_SECTION_KEY) {
+    return Boolean(item.recordData?.email);
+  }
   return Boolean(sectionConfig[item.section] && item.recordData?.id);
 }
 
@@ -846,12 +852,21 @@ function normalizeAdminAccountRow(row) {
   };
 }
 
+function deriveUserStatus(user) {
+  if (user.banned_until) {
+    const banned = new Date(user.banned_until);
+    if (banned > new Date()) return "suspended";
+  }
+  if (user.is_suspended === true) return "suspended";
+  return "active";
+}
+
 function mapAuthUserToDashboardUser(user) {
   return {
     id: user.id,
     name: user.name || user.full_name || "User",
     email: user.email || "-",
-    status: user.status || "active",
+    status: deriveUserStatus(user),
     role: user.role || "user",
     registeredAt: user.registered_at || user.created_at || new Date().toISOString(),
   };
@@ -1207,16 +1222,18 @@ const AdminDashboard = () => {
       ([, route]) => normalizeAdminPath(route) === path,
     );
 
-    if (matched && matched[0] !== activeSection) {
-      setActiveSection(matched[0]);
+    if (matched) {
+      setActiveSection((prev) => (prev !== matched[0] ? matched[0] : prev));
       return;
     }
 
     const ministoreRoot = normalizeAdminPath(ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE);
-    if (!matched && (path === ministoreRoot || path.startsWith(`${ministoreRoot}/`))) {
-      setActiveSection(MGMT_STORE_ORDERS_SECTION);
+    if (path === ministoreRoot || path.startsWith(`${ministoreRoot}/`)) {
+      setActiveSection((prev) =>
+        !Object.keys(MINISTORE_SECTION_PATHS).includes(prev) ? MGMT_STORE_ORDERS_SECTION : prev,
+      );
     }
-  }, [location.pathname, activeSection]);
+  }, [location.pathname]);
 
   useEffect(() => {
     const cachedOrders = readCachedList(STORE_ORDERS_CACHE_KEY).map(normalizeStoreOrder).filter(Boolean);
@@ -1240,13 +1257,18 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (activeSection === MGMT_ADMINS_SECTION && !isCurrentSuperAdmin) {
-      setActiveSection("teams");
-      if (location.pathname.toLowerCase() !== ROUTE_PATHS.ADMIN_DASHBOARD.toLowerCase()) {
-        navigate(ROUTE_PATHS.ADMIN_DASHBOARD, { replace: true });
-      }
+    if (!isCurrentSuperAdmin) {
+      setActiveSection((prev) => {
+        if (prev === MGMT_ADMINS_SECTION) {
+          if (location.pathname.toLowerCase() !== ROUTE_PATHS.ADMIN_DASHBOARD.toLowerCase()) {
+            navigate(ROUTE_PATHS.ADMIN_DASHBOARD, { replace: true });
+          }
+          return "teams";
+        }
+        return prev;
+      });
     }
-  }, [activeSection, isCurrentSuperAdmin, location.pathname, navigate]);
+  }, [isCurrentSuperAdmin, location.pathname, navigate]);
 
 
   useEffect(() => {
@@ -1254,8 +1276,10 @@ const AdminDashboard = () => {
 
     async function bootstrap() {
       try {
-        const data = await loadAdminData();
-        const { archive: dbArchive } = await loadArchiveFromDb();
+        const [data, { archive: dbArchive }] = await Promise.all([
+          loadAdminData(),
+          loadArchiveFromDb(),
+        ]);
         if (mounted) {
           setDbData({
             teams: Array.isArray(data?.teams) ? data.teams : [],
@@ -1783,22 +1807,35 @@ const AdminDashboard = () => {
     isManagementStoreOrdersView ||
     isManagementStoreCartsView;
 
+  const mainRef = useRef(null);
+
   const openSection = (section) => {
     if (section === MGMT_ADMINS_SECTION && !isCurrentSuperAdmin) {
       setError("Only the super admin can manage admin access.");
       return;
     }
+    if (section === activeSection) return;
+
+    setSearchQuery("");
+    setError("");
+    setEditingId(null);
+    setEditorOpen(false);
     setActiveSection(section);
+
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     const path = MINISTORE_SECTION_PATHS[section];
     if (path) {
       if (normalizeAdminPath(location.pathname) !== normalizeAdminPath(path)) {
-        navigate(path);
+        navigate(path, { replace: true });
       }
       return;
     }
 
     if (normalizeAdminPath(location.pathname) !== normalizeAdminPath(ROUTE_PATHS.ADMIN_DASHBOARD)) {
-      navigate(ROUTE_PATHS.ADMIN_DASHBOARD);
+      navigate(ROUTE_PATHS.ADMIN_DASHBOARD, { replace: true });
     }
   };
   const regularAdmins = useMemo(() => {
@@ -1989,16 +2026,76 @@ const AdminDashboard = () => {
     }
   };
 
-  const toggleUserStatus = (id) => {
-    setSuperState((prev) => {
-      const target = prev.users.find((user) => user.id === id);
-      const nextUsers = prev.users.map((user) =>
-        user.id === id
-          ? { ...user, status: user.status === "active" ? "suspended" : "active" }
-          : user,
-      );
-      return { ...prev, users: nextUsers };
+  const toggleUserStatus = async (id) => {
+    const target = (superState.users ?? []).find((user) => user.id === id);
+    if (!target) return;
+
+    const willSuspend = target.status === "active";
+    const nextStatus = willSuspend ? "suspended" : "active";
+
+    setSuperState((prev) => ({
+      ...prev,
+      users: prev.users.map((user) =>
+        user.id === id ? { ...user, status: nextStatus } : user,
+      ),
+    }));
+
+    const { error: rpcError } = await supabase.rpc(ADMIN_SUSPEND_AUTH_USER_RPC, {
+      target_user_id: id,
+      should_suspend: willSuspend,
     });
+
+    if (rpcError) {
+      setSuperState((prev) => ({
+        ...prev,
+        users: prev.users.map((user) =>
+          user.id === id ? { ...user, status: target.status } : user,
+        ),
+      }));
+      setError(
+        `Unable to ${willSuspend ? "suspend" : "activate"} user (${rpcError.message || "Unknown error"}).`,
+      );
+    } else {
+      await loadAuthUsers();
+    }
+  };
+
+  const deleteUser = async (id) => {
+    const target = (superState.users ?? []).find((user) => user.id === id);
+    if (!target) return;
+
+    const nextArchive = await addDeletedAction({
+      id: crypto.randomUUID(),
+      section: USERS_SECTION_KEY,
+      recordId: target.id,
+      recordName: target.name || target.email || "",
+      recordData: {
+        id: target.id,
+        name: target.name,
+        email: target.email,
+        status: target.status,
+        role: target.role,
+        registeredAt: target.registeredAt,
+      },
+      at: new Date().toISOString(),
+    });
+    setArchive(nextArchive);
+
+    const { error: rpcError } = await supabase.rpc(ADMIN_DELETE_AUTH_USER_RPC, {
+      target_user_id: id,
+    });
+
+    if (rpcError) {
+      setError(
+        `User archived but could not be deleted from auth (${rpcError.message || "Unknown error"}).`,
+      );
+      return;
+    }
+
+    setSuperState((prev) => ({
+      ...prev,
+      users: prev.users.filter((user) => user.id !== id),
+    }));
   };
 
   const revokeAdminAccess = (id) => {
@@ -2617,9 +2714,24 @@ const AdminDashboard = () => {
 
     const section = item.section;
     const recordData = item.recordData;
-    const canRestore = Boolean(sectionConfig[section] && recordData?.id) || section === STORE_ORDERS_TABLE;
+    const canRestore = Boolean(sectionConfig[section] && recordData?.id) || section === STORE_ORDERS_TABLE || (section === USERS_SECTION_KEY && recordData?.email);
 
     if (canRestore) {
+      if (section === USERS_SECTION_KEY) {
+        const { error: restoreError } = await supabase.rpc(ADMIN_SUSPEND_AUTH_USER_RPC, {
+          target_user_id: recordData.id,
+          should_suspend: false,
+        });
+        if (restoreError) {
+          setError(restoreError.message || "Unable to restore user. The account may need to be re-created.");
+          return;
+        }
+        await loadAuthUsers();
+        const nextArchive = await deleteArchiveActionById(item.id);
+        setArchive(nextArchive);
+        return;
+      }
+
       if (section === STORE_ORDERS_TABLE) {
         const payload = {
           user_id: recordData.user_id || null,
@@ -3234,7 +3346,7 @@ const AdminDashboard = () => {
     return (
       <div className="admin-db-page">
         <main className="admin-db-main">
-          <LoadingScreen message="Loading admin database... Please wait." />
+          <LoadingScreen message="Loading admin panel..." compact />
         </main>
       </div>
     );
@@ -3384,7 +3496,8 @@ const AdminDashboard = () => {
           </div>
         </aside>
 
-        <main className="admin-db-main">
+        <main className="admin-db-main" ref={mainRef}>
+          <div className="admin-db-section-content" key={activeSection}>
           <header className="admin-db-header">
             <div>
               <p className="admin-db-kicker">GridOne Control Center</p>
@@ -3642,7 +3755,21 @@ const AdminDashboard = () => {
                         <td data-label="Name">{user.name}</td>
                         <td data-label="Email">{user.email}</td>
                         <td data-label="Mobile">{userContactById.get(user.id)?.mobile || "N/A"}</td>
-                        <td data-label="Status">{user.status}</td>
+                        <td data-label="Status">
+                          <span
+                            style={{
+                              display: "inline-block",
+                              padding: "2px 10px",
+                              borderRadius: "12px",
+                              fontSize: "0.85em",
+                              fontWeight: 600,
+                              color: user.status === "active" ? "#15803d" : "#dc2626",
+                              background: user.status === "active" ? "#dcfce7" : "#fee2e2",
+                            }}
+                          >
+                            {user.status === "active" ? "Active" : "Suspended"}
+                          </span>
+                        </td>
                         <td data-label="Cart">
                           {(userStoreStats.get(user.id)?.cartLines || 0)} lines /{" "}
                           {(userStoreStats.get(user.id)?.cartQty || 0)} qty
@@ -3660,6 +3787,17 @@ const AdminDashboard = () => {
                           <div className="admin-db-archive-actions">
                             <button type="button" onClick={() => toggleUserStatus(user.id)}>
                               {user.status === "active" ? "Suspend" : "Activate"}
+                            </button>
+                            <button
+                              type="button"
+                              className="danger"
+                              onClick={() => {
+                                if (window.confirm(`Delete user "${user.name || user.email}"? This will archive the user and remove their auth account.`)) {
+                                  deleteUser(user.id);
+                                }
+                              }}
+                            >
+                              Delete
                             </button>
                           </div>
                         </td>
@@ -4327,6 +4465,7 @@ const AdminDashboard = () => {
               {rows.length === 0 && <p className="admin-db-empty">No records available in this section.</p>}
             </section>
           )}
+          </div>
         </main>
       </div>
 

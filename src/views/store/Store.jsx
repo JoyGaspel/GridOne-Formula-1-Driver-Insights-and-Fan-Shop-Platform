@@ -1473,11 +1473,15 @@ export default function Store() {
     setSelectedImageIndex(0);
     setDetailOpen(true);
     setNotice("");
+    window.history.pushState({ detailModal: true }, "");
   };
 
-  const closeDetail = () => {
+  const closeDetail = useCallback(() => {
     setDetailOpen(false);
-  };
+    if (window.history.state?.detailModal) {
+      window.history.back();
+    }
+  }, []);
 
   useEffect(() => {
     selectedProductIdRef.current = selectedProduct?.id || null;
@@ -1485,6 +1489,16 @@ export default function Store() {
       lastDetailProductRef.current = selectedProduct;
     }
   }, [selectedProduct]);
+
+  useEffect(() => {
+    const handleDetailPopState = () => {
+      if (detailOpen) {
+        setDetailOpen(false);
+      }
+    };
+    window.addEventListener("popstate", handleDetailPopState);
+    return () => window.removeEventListener("popstate", handleDetailPopState);
+  }, [detailOpen]);
 
   useEffect(() => {
     if (historyReadyRef.current) {
