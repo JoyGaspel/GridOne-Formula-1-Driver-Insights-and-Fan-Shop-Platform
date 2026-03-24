@@ -42,7 +42,11 @@ const Login = () => {
     });
 
     if (error) {
-      setError(error.message);
+      if (error.message.toLowerCase().includes("invalid")) {
+        setError("No account found or incorrect password. Please sign up if you don't have an account.");
+      } else {
+        setError(error.message);
+      }
     } else {
       localStorage.setItem("gridone_session_role", "user");
       navigate(ROUTE_PATHS.LANDING);

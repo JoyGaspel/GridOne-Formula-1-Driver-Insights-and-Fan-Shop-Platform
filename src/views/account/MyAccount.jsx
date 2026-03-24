@@ -221,7 +221,25 @@ export default function MyAccount() {
         currentUser.user_metadata?.name ||
         "";
       const signupName = localStorage.getItem("gridone_signup_fullname") || "";
-      const resolvedName = nameFromMeta || signupName;
+      let resolvedName = nameFromMeta || signupName;
+
+      // Always try to fetch the name from registered users as fallback
+      if (!resolvedName) {
+        const { data: regRow } = await supabase
+          .from("admin_registered_users")
+          .select("name")
+          .eq("email", currentUser.email)
+          .limit(1)
+          .single();
+        if (regRow?.name) {
+          resolvedName = regRow.name;
+        }
+      }
+
+      // Last resort: use email username as display name
+      if (!resolvedName) {
+        resolvedName = currentUser.email?.split("@")[0] || "";
+      }
 
       setUser(currentUser);
       setRole(resolvedRole);

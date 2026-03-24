@@ -51,7 +51,7 @@ export function normalizeAddress(address, fallbackName = "") {
   return {
     id: source.id ?? null,
     country: "Philippines",
-    fullName: String(source.fullName ?? fallbackName ?? "").trim(),
+    fullName: String(source.fullName || fallbackName || "").trim(),
     phoneNumber: String(source.phoneNumber ?? "").trim(),
     usePhoneNumberForGcash: Boolean(source.usePhoneNumberForGcash),
     region: String(source.region ?? "").trim(),

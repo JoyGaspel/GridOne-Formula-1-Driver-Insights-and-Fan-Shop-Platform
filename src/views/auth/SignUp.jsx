@@ -17,6 +17,8 @@ const Signup = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [existingUserEmail, setExistingUserEmail] = useState("");
+  const [emailTaken, setEmailTaken] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -42,6 +44,32 @@ const Signup = () => {
   const isPasswordValid = validatePassword(password);
   const isConfirmValid =
     confirmPassword.length > 0 && password === confirmPassword;
+
+  /* ---------------- EMAIL EXISTS CHECK ---------------- */
+  const checkEmailExists = async () => {
+    const trimmed = email.trim();
+    if (!validateEmail(trimmed)) {
+      setEmailTaken(false);
+      return;
+    }
+    setCheckingEmail(true);
+    try {
+      const { data, error: queryError } = await supabase
+        .from("admin_registered_users")
+        .select("id")
+        .eq("email", trimmed)
+        .limit(1);
+
+      if (!queryError && (data ?? []).length > 0) {
+        setEmailTaken(true);
+      } else {
+        setEmailTaken(false);
+      }
+    } catch {
+      setEmailTaken(false);
+    }
+    setCheckingEmail(false);
+  };
 
   /* ---------------- SIGNUP ---------------- */
   const handleSignUp = async (e) => {
@@ -108,12 +136,13 @@ const Signup = () => {
         return;
       }
 
+
       // Signup using Supabase default SMTP (email OTP verification)
       const { error } = await supabase.auth.signUp({
         email: trimmedEmail,
         password,
         options: {
-          emailRedirectTo: window.location.origin + "/login",
+          emailRedirectTo: `${window.location.origin}/login`,
           data: {
             first_name: trimmedFirstName,
             last_name: trimmedLastName,
@@ -273,9 +302,19 @@ const Signup = () => {
                 onChange={(event) => {
                   setEmail(event.target.value);
                   setExistingUserEmail("");
+                  setEmailTaken(false);
                 }}
+                onBlur={checkEmailExists}
                 required
               />
+              {emailTaken && (
+                <p className="signup-error" style={{ marginTop: "0.5rem" }}>
+                  This email already has an account.{" "}
+                  <a href="/login" style={{ color: "#60a5fa", fontWeight: 600 }}>
+                    Log in instead
+                  </a>
+                </p>
+              )}
             </div>
 
             <div className="input-group password-group">
@@ -329,7 +368,7 @@ const Signup = () => {
             <button
               type="submit"
               className="signup-button"
-              disabled={loading}
+              disabled={loading || emailTaken}
             >
               {loading ? "Creating Account..." : "Sign Up"}
             </button>

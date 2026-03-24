@@ -33,6 +33,10 @@ body .navbar {
   position: relative;
 }
 
+.container {
+  padding-top: 80px; /* same as navbar height */
+}
+
 /* ========== BRAND ========== */
 
 .navbar-brand {
@@ -374,5 +378,15 @@ body .navbar {
 
   .navbar-toggle span {
     width: 16px;
+  }
+}
+/* =========================
+   MOBILE RESPONSIVENESS
+========================= */
+
+/* Hide admin button on mobile */
+@media (max-width: 900px) {
+  .btn.btn-outline.admin {
+    display: none !important;
   }
 }

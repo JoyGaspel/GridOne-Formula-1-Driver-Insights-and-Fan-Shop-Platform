@@ -1,24 +1,26 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import LandingPage from "../views/landing/LandingPage";
-import AdminLogin from "../views/admin/Admin";
-import Login from "../views/auth/Login";
-import Signup from "../views/auth/SignUp";
-import ForgotPassword from "../views/auth/Forgotpass";
-import DriversPage from "../views/drivers/DriversPage";
-import DriverDetail from "../views/drivers/DriverDetails";
-import Teams from "../views/teams/Teams";
-import TeamDetail from "../views/teams/TeamDetail";
-import CircuitPage from "../views/circuits/Circuits";
-import CircuitDetail from "../views/circuits/CircuitDetail";
-import Calendar from "../views/calendar/Calendar";
-import CalendarDetail from "../views/calendar/CalendarDetail";
-import AdminDashboard from "../views/admin/AdminDB";
-import Store from "../views/store/Store";
-import MyAccount from "../views/account/MyAccount";
 import supabase from "../lib/supabase";
 import { ROUTE_PATHS } from "./routePaths";
 import Footer from "../components/Footer";
+import LoadingScreen from "../components/LoadingScreen";
+
+const LandingPage = lazy(() => import("../views/landing/LandingPage"));
+const AdminLogin = lazy(() => import("../views/admin/Admin"));
+const Login = lazy(() => import("../views/auth/Login"));
+const Signup = lazy(() => import("../views/auth/SignUp"));
+const ForgotPassword = lazy(() => import("../views/auth/Forgotpass"));
+const DriversPage = lazy(() => import("../views/drivers/DriversPage"));
+const DriverDetail = lazy(() => import("../views/drivers/DriverDetails"));
+const Teams = lazy(() => import("../views/teams/Teams"));
+const TeamDetail = lazy(() => import("../views/teams/TeamDetail"));
+const CircuitPage = lazy(() => import("../views/circuits/Circuits"));
+const CircuitDetail = lazy(() => import("../views/circuits/CircuitDetail"));
+const Calendar = lazy(() => import("../views/calendar/Calendar"));
+const CalendarDetail = lazy(() => import("../views/calendar/CalendarDetail"));
+const AdminDashboard = lazy(() => import("../views/admin/AdminDB"));
+const Store = lazy(() => import("../views/store/Store"));
+const MyAccount = lazy(() => import("../views/account/MyAccount"));
 
 export default function AppRoutes() {
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -72,6 +74,7 @@ export default function AppRoutes() {
     <div className="app-shell">
       <div className="app-shell-main">
         <div className="app-route-fade" key={location.key || location.pathname}>
+          <Suspense fallback={<LoadingScreen message="Loading page..." />}>
           <Routes location={location}>
             <Route
               path={ROUTE_PATHS.ROOT}
@@ -109,6 +112,7 @@ export default function AppRoutes() {
             <Route path={ROUTE_PATHS.STORE} element={<Store />} />
             <Route path={ROUTE_PATHS.ACCOUNT} element={<MyAccount />} />
           </Routes>
+          </Suspense>
         </div>
       </div>
       {hideFooter ? null : <Footer variant={isMiniStore ? "ministore" : "default"} />}

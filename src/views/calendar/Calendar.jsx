@@ -20,7 +20,12 @@ const Calendar = () => {
         const data = await loadAdminData();
 
         if (mounted) {
-          setRaces(data.races ?? []);
+          // ✅ SORT ROUNDS HERE
+          const sortedRaces = (data.races ?? []).sort(
+            (a, b) => Number(a.round) - Number(b.round)
+          );
+
+          setRaces(sortedRaces);
           setError("");
         }
       } catch (apiError) {
@@ -76,6 +81,7 @@ const Calendar = () => {
         <section className="calendar-grid" aria-label="Formula 1 race calendar list">
           {loading && <LoadingScreen message={`Loading ${SEASON_YEAR} calendar... Please wait.`} compact />}
           {!loading && error && <p>{error}</p>}
+
           {!loading &&
             !error &&
             races.map((race, index) => (
@@ -96,7 +102,10 @@ const Calendar = () => {
                 >
                   <div className="calendar-image">
                     <img
-                      src={String(race.image ?? "").trim() || "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800&auto=format"}
+                      src={
+                        String(race.image ?? "").trim() ||
+                        "https://images.unsplash.com/photo-1580274455191-1c62238fa333?w=800&auto=format"
+                      }
                       alt={race.name}
                       className="calendar-photo"
                       loading="lazy"
@@ -113,14 +122,7 @@ const Calendar = () => {
                     <h3 className="calendar-name">{race.name}</h3>
                     <p className="calendar-location">{race.location}</p>
                     <p className="calendar-circuit">{race.circuit}</p>
-
-                    <div className="calendar-meta">
-                      <span className="meta-pill">{race.distance}</span>
-                      <span className="meta-pill">{race.laps} laps</span>
-                    </div>
                   </div>
-
-                  <div className="card-rail" aria-hidden="true" />
                 </article>
               </Link>
             ))}

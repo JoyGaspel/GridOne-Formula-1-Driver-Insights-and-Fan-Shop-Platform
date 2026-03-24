@@ -33,7 +33,7 @@ const PRODUCTS_TABLE = "store_products";
 const DISCOUNTS_TABLE = "store_discounts";
 const OTP_TRANSACTIONS_TABLE = "store_otp_transactions";
 const PAYMENT_EVENTS_TABLE = "store_payment_events";
-const STORE_PRODUCTS_CACHE_KEY = "gridone_store_products_cache_v1";
+const STORE_PRODUCTS_CACHE_KEY = "gridone_store_products_cache_v2";
 const STORE_DISCOUNTS_CACHE_KEY = "gridone_store_discounts_cache_v1";
 const cartItemKey = (id, size) => `${id}::${size}`;
 
@@ -535,16 +535,26 @@ export default function Store() {
     (value) => {
       runTransition(() => {
         setActiveDepartment(value);
-        if (value === "Gifts & Accessories") {
-          setActiveCategory("Accessories");
-        } else if (CATEGORY_DEPARTMENTS.has(value)) {
-          setActiveCategory(value);
-        } else {
-          setActiveCategory("All");
-        }
+        setActivePriceBand("all");
+        setQuery("");
+
         if (value === "Shop By Driver") {
+          setActiveCategory("All");
           setActiveTeam("All Teams");
         } else if (value === "Shop By Team") {
+          setActiveCategory("All");
+          setActiveDriver("All Drivers");
+        } else if (value === "Gifts & Accessories") {
+          setActiveCategory("Accessories");
+          setActiveTeam("All Teams");
+          setActiveDriver("All Drivers");
+        } else if (CATEGORY_DEPARTMENTS.has(value)) {
+          setActiveCategory(value);
+          setActiveTeam("All Teams");
+          setActiveDriver("All Drivers");
+        } else {
+          setActiveCategory("All");
+          setActiveTeam("All Teams");
           setActiveDriver("All Drivers");
         }
         goToView("catalog");
@@ -577,10 +587,10 @@ export default function Store() {
 
     const normalized = data.map((product) => ({
       id: product.id,
-      name: product.name,
-      category: product.category,
-      team: product.team,
-      driver: product.driver,
+      name: String(product.name || "").trim(),
+      category: String(product.category || "").trim(),
+      team: String(product.team || "").trim(),
+      driver: String(product.driver || "").trim(),
       price: Number(product.price || 0),
       stock: Number(product.stock || 0),
       sizes: Array.isArray(product.sizes) ? product.sizes : ["One Size"],
@@ -1123,23 +1133,36 @@ export default function Store() {
   const filteredProducts = useMemo(() => {
     const normalized = deferredQuery.trim().toLowerCase();
     const getCategoryBucket = (product) => {
-      const raw = String(product?.category || "").toLowerCase();
-      if (raw === "men") return "Men";
-      if (raw === "women") return "Women";
-      if (raw === "kids") return "Kids";
-      if (raw === "headwear") return "Headwear";
-      if (raw === "collectibles") return "Collectibles";
-      if (raw === "caps") return "Caps";
-      if (raw === "accessories") return "Accessories";
-      if (raw === "shirts") return "Shirts";
-      if (raw === "jackets") return "Jackets";
+      const raw = String(product?.category || "").toLowerCase().trim();
+      const name = String(product?.name || "").toLowerCase();
+
+      if (raw.includes("men") && !raw.includes("women")) return "Men";
+      if (raw.includes("women")) return "Women";
+      if (raw.includes("kid")) return "Kids";
+      if (raw.includes("headwear") || raw.includes("hat") || raw.includes("beanie")) return "Headwear";
+      if (raw.includes("collectible") || raw.includes("poster") || raw.includes("model")) return "Collectibles";
+      if (raw.includes("cap")) return "Caps";
+      if (raw.includes("accessor")) return "Accessories";
+      if (raw.includes("shirt") || raw.includes("tee") || raw.includes("polo") || raw.includes("t-shirt")) return "Shirts";
+      if (raw.includes("jacket") || raw.includes("hoodie") || raw.includes("sweater") || raw.includes("zip")) return "Jackets";
+
+      // Fallback: check product name for category hints
+      if (name.includes("cap") || name.includes("hat")) return "Caps";
+      if (name.includes("jacket") || name.includes("hoodie")) return "Jackets";
+      if (name.includes("shirt") || name.includes("tee") || name.includes("polo")) return "Shirts";
+      if (name.includes("kid")) return "Kids";
+
       return "Collectibles";
     };
     const filtered = products.filter((product) => {
       const matchesCategory =
         activeCategory === "All" || getCategoryBucket(product) === activeCategory;
-      const matchesTeam = activeTeam === "All Teams" || product.team === activeTeam;
-      const matchesDriver = activeDriver === "All Drivers" || product.driver === activeDriver;
+      const matchesTeam =
+        activeTeam === "All Teams" ||
+        String(product.team || "").trim().toLowerCase() === activeTeam.trim().toLowerCase();
+      const matchesDriver =
+        activeDriver === "All Drivers" ||
+        String(product.driver || "").trim().toLowerCase() === activeDriver.trim().toLowerCase();
       const matchesPrice =
         activePriceBand === "all" ||
         (activePriceBand === "budget" && product.price < 2000) ||
@@ -1172,16 +1195,24 @@ export default function Store() {
 
   const categoryCounts = useMemo(() => {
     const getCategoryBucket = (product) => {
-      const raw = String(product?.category || "").toLowerCase();
-      if (raw === "men") return "Men";
-      if (raw === "women") return "Women";
-      if (raw === "kids") return "Kids";
-      if (raw === "headwear") return "Headwear";
-      if (raw === "collectibles") return "Collectibles";
-      if (raw === "caps") return "Caps";
-      if (raw === "accessories") return "Accessories";
-      if (raw === "shirts") return "Shirts";
-      if (raw === "jackets") return "Jackets";
+      const raw = String(product?.category || "").toLowerCase().trim();
+      const name = String(product?.name || "").toLowerCase();
+
+      if (raw.includes("men") && !raw.includes("women")) return "Men";
+      if (raw.includes("women")) return "Women";
+      if (raw.includes("kid")) return "Kids";
+      if (raw.includes("headwear") || raw.includes("hat") || raw.includes("beanie")) return "Headwear";
+      if (raw.includes("collectible") || raw.includes("poster") || raw.includes("model")) return "Collectibles";
+      if (raw.includes("cap")) return "Caps";
+      if (raw.includes("accessor")) return "Accessories";
+      if (raw.includes("shirt") || raw.includes("tee") || raw.includes("polo") || raw.includes("t-shirt")) return "Shirts";
+      if (raw.includes("jacket") || raw.includes("hoodie") || raw.includes("sweater") || raw.includes("zip")) return "Jackets";
+
+      if (name.includes("cap") || name.includes("hat")) return "Caps";
+      if (name.includes("jacket") || name.includes("hoodie")) return "Jackets";
+      if (name.includes("shirt") || name.includes("tee") || name.includes("polo")) return "Shirts";
+      if (name.includes("kid")) return "Kids";
+
       return "Collectibles";
     };
     const baseCounts = (STORE_CATEGORIES || [])
