@@ -266,10 +266,14 @@ const normalizeAddressList = (addresses) =>
 const getStatusTone = (value) => {
   const normalized = String(value || "").trim().toLowerCase();
 
+  if (normalized.includes("out for delivery")) {
+    return "info";
+  }
+
   if (
     normalized.includes("success") ||
     normalized.includes("paid") ||
-    normalized.includes("delivered") ||
+    normalized === "delivered" ||
     normalized.includes("completed")
   ) {
     return "success";
@@ -280,7 +284,8 @@ const getStatusTone = (value) => {
     normalized.includes("processing") ||
     normalized.includes("packed") ||
     normalized.includes("shipped") ||
-    normalized.includes("transit")
+    normalized.includes("transit") ||
+    normalized.includes("in transit")
   ) {
     return "info";
   }
@@ -462,7 +467,12 @@ export default function Store() {
   const [activePriceBand, setActivePriceBand] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [view, setView] = useState("catalog");
+  const [view, setView] = useState(() => {
+    const saved = window.history.state?.storeView;
+    return saved && ["catalog", "cart", "orders", "checkout", "details"].includes(saved)
+      ? saved
+      : "catalog";
+  });
   const [activeDepartment, setActiveDepartment] = useState("Men");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
@@ -506,6 +516,8 @@ export default function Store() {
   const [refundSubmitting, setRefundSubmitting] = useState(false);
   const [refundError, setRefundError] = useState("");
   const cartSyncVersionRef = useRef(0);
+  const cartSyncingRef = useRef(false);
+  const cartSyncTimerRef = useRef(null);
   const paymentTimerRef = useRef(null);
   const paymentCloseTimerRef = useRef(null);
   const historyReadyRef = useRef(false);
@@ -578,6 +590,7 @@ export default function Store() {
       .from(PRODUCTS_TABLE)
       .select("*")
       .eq("is_active", true)
+      .eq("is_deleted", false)
       .order("created_at", { ascending: false });
 
     if (error || !Array.isArray(data)) {
@@ -609,6 +622,7 @@ export default function Store() {
       .from(DISCOUNTS_TABLE)
       .select("*")
       .eq("is_active", true)
+      .eq("is_deleted", false)
       .order("priority", { ascending: true });
 
     if (error || !Array.isArray(data)) {
@@ -933,46 +947,68 @@ export default function Store() {
       return;
     }
 
-    const syncCart = async () => {
-      const syncVersion = cartSyncVersionRef.current + 1;
-      cartSyncVersionRef.current = syncVersion;
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
 
-      const { error: markError } = await supabase
-        .from(CART_TABLE)
-        .update({ is_deleted: true })
-        .eq("user_id", userId)
-        .eq("is_deleted", false);
+    if (cartSyncTimerRef.current) {
+      clearTimeout(cartSyncTimerRef.current);
+    }
 
-      if (markError || cartSyncVersionRef.current !== syncVersion) {
-        return;
-      }
+    const syncVersion = cartSyncVersionRef.current + 1;
+    cartSyncVersionRef.current = syncVersion;
 
-      if (cart.length === 0) {
-        return;
-      }
-
-      const payload = cart.map((item) => ({
-        user_id: userId,
-        product_id: item.id,
-        name: item.name,
-        category: item.category,
-        team: item.team,
-        image: item.image,
-        price: item.price,
-        size: item.size,
-        stock: item.stock,
-        quantity: item.quantity,
-        is_deleted: false,
-      }));
-
+    cartSyncTimerRef.current = setTimeout(async () => {
       if (cartSyncVersionRef.current !== syncVersion) {
         return;
       }
 
-      await supabase.from(CART_TABLE).insert(payload);
-    };
+      cartSyncingRef.current = true;
 
-    void syncCart();
+      try {
+        const { error: markError } = await supabase
+          .from(CART_TABLE)
+          .update({ is_deleted: true })
+          .eq("user_id", userId)
+          .eq("is_deleted", false);
+
+        if (markError || cartSyncVersionRef.current !== syncVersion) {
+          return;
+        }
+
+        if (cart.length === 0) {
+          return;
+        }
+
+        const payload = cart.map((item) => ({
+          user_id: userId,
+          product_id: item.id,
+          name: item.name,
+          category: item.category,
+          team: item.team,
+          image: item.image,
+          price: item.price,
+          size: item.size,
+          stock: item.stock,
+          quantity: item.quantity,
+          is_deleted: false,
+        }));
+
+        if (cartSyncVersionRef.current !== syncVersion) {
+          return;
+        }
+
+        await supabase.from(CART_TABLE).insert(payload);
+      } finally {
+        setTimeout(() => {
+          cartSyncingRef.current = false;
+        }, 500);
+      }
+    }, 400);
+
+    return () => {
+      if (cartSyncTimerRef.current) {
+        clearTimeout(cartSyncTimerRef.current);
+      }
+    };
   }, [cart, isHydrated, userId]);
 
   useEffect(() => {
@@ -991,6 +1027,22 @@ export default function Store() {
     void loadDiscounts();
   }, [loadDiscounts]);
 
+  const reloadOrders = useCallback(async () => {
+    if (!userId) {
+      return;
+    }
+    const { data, error } = await supabase
+      .from(ORDERS_TABLE)
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_deleted", false)
+      .order("created_at", { ascending: false });
+
+    if (!error && Array.isArray(data)) {
+      setOrders(data.map(mapDbOrderRow).filter(Boolean));
+    }
+  }, [userId]);
+
   useEffect(() => {
     if (!userId) {
       return;
@@ -1006,48 +1058,21 @@ export default function Store() {
           table: ORDERS_TABLE,
           filter: `user_id=eq.${userId}`,
         },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            const inserted = mapDbOrderRow(payload.new);
-            if (!inserted) {
-              return;
-            }
-            setOrders((prev) => {
-              const exists = prev.some((order) => order.dbId === inserted.dbId);
-              if (exists) {
-                return prev;
-              }
-              return [inserted, ...prev];
-            });
-            return;
-          }
-
-          if (payload.eventType === "UPDATE") {
-            const updated = mapDbOrderRow(payload.new);
-            if (!updated) {
-              return;
-            }
-            setOrders((prev) =>
-              prev.map((order) => (order.dbId === updated.dbId ? updated : order))
-            );
-            return;
-          }
-
-          if (payload.eventType === "DELETE") {
-            const deletedId = payload.old?.id;
-            if (!deletedId) {
-              return;
-            }
-            setOrders((prev) => prev.filter((order) => order.dbId !== deletedId));
-          }
+        () => {
+          void reloadOrders();
         }
       )
       .subscribe();
 
+    const pollInterval = setInterval(() => {
+      void reloadOrders();
+    }, 4000);
+
     return () => {
       void supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
-  }, [userId]);
+  }, [userId, reloadOrders]);
 
   useEffect(() => {
     const channels = [];
@@ -1088,10 +1113,18 @@ export default function Store() {
             filter: `user_id=eq.${userId}`,
           },
           async () => {
+            if (cartSyncingRef.current) {
+              return;
+            }
             const { data, error } = await supabase
               .from(CART_TABLE)
               .select("*")
-              .eq("user_id", userId);
+              .eq("user_id", userId)
+              .eq("is_deleted", false);
+
+            if (cartSyncingRef.current) {
+              return;
+            }
 
             if (!error && Array.isArray(data)) {
               const nextCart = normalizeCartItems(
@@ -1510,11 +1543,26 @@ export default function Store() {
     historyReadyRef.current = true;
 
     const currentState = window.history.state || {};
-    if (!currentState?.storeView) {
+    const restoredView = currentState?.storeView;
+    if (!restoredView) {
       window.history.replaceState(
         { ...currentState, storeView: "catalog", productId: null },
         ""
       );
+    } else if (restoredView === "details" && currentState.productId) {
+      const found = products.find((item) => item.id === currentState.productId);
+      if (found) {
+        setSelectedProduct(found);
+        setSelectedSize(found.sizes[0] || "One Size");
+        setSelectedQty(1);
+        setSelectedImageIndex(0);
+      } else {
+        setView("catalog");
+        window.history.replaceState(
+          { ...currentState, storeView: "catalog", productId: null },
+          ""
+        );
+      }
     }
 
     const handlePopState = (event) => {

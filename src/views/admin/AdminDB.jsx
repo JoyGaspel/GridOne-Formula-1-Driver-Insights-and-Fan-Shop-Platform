@@ -702,6 +702,31 @@ function formatStatusDate(value) {
   return date.toLocaleDateString("en-GB");
 }
 
+function extractCityFromAddress(address) {
+  const raw = String(address || "").trim();
+  if (!raw) {
+    return "";
+  }
+  const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
+  if (parts.length >= 3) {
+    return parts[parts.length - 3];
+  }
+  if (parts.length >= 2) {
+    return parts[parts.length - 2];
+  }
+  return parts[0] || "";
+}
+
+function buildShippedDeliveryStatus(order) {
+  const city = extractCityFromAddress(order?.recipient?.address);
+  return city ? `In transit to ${city}` : "In transit";
+}
+
+function buildOutForDeliveryStatus(order) {
+  const address = String(order?.recipient?.address || "").trim();
+  return address ? `Out for delivery — ${address}` : "Out for delivery";
+}
+
 function getOrderStatusDisplay(order) {
   const status = String(order?.orderStatus || "-");
   const normalized = status.trim().toLowerCase();
@@ -4097,7 +4122,7 @@ const AdminDashboard = () => {
                               onClick={() =>
                                 updateStoreOrderProgress(
                                   order.id,
-                                  { orderStatus: "Shipped", deliveryStatus: "Linehaul" },
+                                  { orderStatus: "Shipped", deliveryStatus: buildShippedDeliveryStatus(order) },
                                   {
                                     shippedAt:
                                       toIsoDate(
@@ -4128,7 +4153,7 @@ const AdminDashboard = () => {
                               onClick={() =>
                                 updateStoreOrderProgress(
                                   order.id,
-                                  { orderStatus: "Out for Delivery", deliveryStatus: "Last-mile" },
+                                  { orderStatus: "Out for Delivery", deliveryStatus: buildOutForDeliveryStatus(order) },
                                   {
                                     outForDeliveryAt:
                                       toIsoDate(
