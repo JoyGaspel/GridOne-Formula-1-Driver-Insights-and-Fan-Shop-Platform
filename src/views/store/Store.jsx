@@ -840,11 +840,12 @@ export default function Store() {
         { data: addressRows, error: addressError },
       ] =
         await Promise.all([
-          supabase.from(CART_TABLE).select("*").eq("user_id", nextUserId),
+          supabase.from(CART_TABLE).select("*").eq("user_id", nextUserId).eq("is_deleted", false),
           supabase
             .from(ORDERS_TABLE)
             .select("*")
             .eq("user_id", nextUserId)
+            .eq("is_deleted", false)
             .order("created_at", { ascending: false }),
           supabase.from(ADDRESS_TABLE).select("*").eq("user_id", nextUserId),
         ]);
@@ -936,12 +937,13 @@ export default function Store() {
       const syncVersion = cartSyncVersionRef.current + 1;
       cartSyncVersionRef.current = syncVersion;
 
-      const { error: deleteError } = await supabase
+      const { error: markError } = await supabase
         .from(CART_TABLE)
-        .delete()
-        .eq("user_id", userId);
+        .update({ is_deleted: true })
+        .eq("user_id", userId)
+        .eq("is_deleted", false);
 
-      if (deleteError || cartSyncVersionRef.current !== syncVersion) {
+      if (markError || cartSyncVersionRef.current !== syncVersion) {
         return;
       }
 
@@ -960,6 +962,7 @@ export default function Store() {
         size: item.size,
         stock: item.stock,
         quantity: item.quantity,
+        is_deleted: false,
       }));
 
       if (cartSyncVersionRef.current !== syncVersion) {
@@ -2775,44 +2778,44 @@ export default function Store() {
                 </article>
                 ))}
               </div>
-          </section>
-        )}
 
-        {view === "cart" && cart.length > 0 && (
-          <section className="cart-summary-dock">
-            <div className="cart-summary-dock-inner">
-              <label className="cart-select-all">
-                <input
-                  type="checkbox"
-                  checked={isAllCartSelected}
-                  onChange={toggleSelectAllCart}
-                />
-                <span>Select all</span>
-              </label>
+              {cart.length > 0 && (
+                <div className="cart-summary-dock">
+                  <div className="cart-summary-dock-inner">
+                    <label className="cart-select-all">
+                      <input
+                        type="checkbox"
+                        checked={isAllCartSelected}
+                        onChange={toggleSelectAllCart}
+                      />
+                      <span>Select all</span>
+                    </label>
 
-              <div className="cart-summary-dock-copy">
-                <span>{selectedCartCount} item{selectedCartCount === 1 ? "" : "s"} ready</span>
-                <strong>{currency(selectedCartSubtotal)}</strong>
-              </div>
+                    <div className="cart-summary-dock-copy">
+                      <span>{selectedCartCount} item{selectedCartCount === 1 ? "" : "s"} ready</span>
+                      <strong>{currency(selectedCartSubtotal)}</strong>
+                    </div>
 
-              <div className="cart-summary-dock-actions">
-                <button
-                  type="button"
-                  className="cart-inline-btn"
-                  onClick={removeSelectedCartItems}
-                >
-                  Remove selected
-                </button>
-                <button
-                  type="button"
-                  className="checkout-btn cart-summary-checkout-btn"
-                  onClick={openCheckout}
-                  disabled={selectedCartItems.length === 0}
-                >
-                  Checkout
-                </button>
-              </div>
-            </div>
+                    <div className="cart-summary-dock-actions">
+                      <button
+                        type="button"
+                        className="cart-inline-btn"
+                        onClick={removeSelectedCartItems}
+                      >
+                        Remove selected
+                      </button>
+                      <button
+                        type="button"
+                        className="checkout-btn cart-summary-checkout-btn"
+                        onClick={openCheckout}
+                        disabled={selectedCartItems.length === 0}
+                      >
+                        Checkout
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
           </section>
         )}
 

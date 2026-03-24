@@ -229,10 +229,10 @@ function mapSectionRows(section, rows) {
 
 async function _loadAdminDataFromDb() {
   const [teamsResult, driversResult, racesResult, circuitsResult] = await Promise.all([
-    supabase.from(CONTENT_TABLES.teams).select("*").order("name", { ascending: true }),
-    supabase.from(CONTENT_TABLES.drivers).select("*").order("name", { ascending: true }),
-    supabase.from(CONTENT_TABLES.races).select("*").order("round", { ascending: true }),
-    supabase.from(CONTENT_TABLES.circuits).select("*").order("name", { ascending: true }),
+    supabase.from(CONTENT_TABLES.teams).select("*").eq("is_deleted", false).order("name", { ascending: true }),
+    supabase.from(CONTENT_TABLES.drivers).select("*").eq("is_deleted", false).order("name", { ascending: true }),
+    supabase.from(CONTENT_TABLES.races).select("*").eq("is_deleted", false).order("round", { ascending: true }),
+    supabase.from(CONTENT_TABLES.circuits).select("*").eq("is_deleted", false).order("name", { ascending: true }),
   ]);
 
   const results = [teamsResult, driversResult, racesResult, circuitsResult];
@@ -414,7 +414,8 @@ export async function syncTeamsFromApiToDb(year = SEASON_YEAR) {
 export async function ensureTeamsSeededFromApi({ minCount = 2, year = SEASON_YEAR } = {}) {
   const { count, error } = await supabase
     .from(CONTENT_TABLES.teams)
-    .select("id", { count: "exact", head: true });
+    .select("id", { count: "exact", head: true })
+    .eq("is_deleted", false);
 
   if (error) {
     return { error };
@@ -453,7 +454,7 @@ export async function deleteAdminContentRecord(section, id) {
     return { error: null };
   }
 
-  return supabase.from(table).delete().eq("id", id);
+  return supabase.from(table).update({ is_deleted: true }).eq("id", id);
 }
 
 export function subscribeAdminContent(onChange) {

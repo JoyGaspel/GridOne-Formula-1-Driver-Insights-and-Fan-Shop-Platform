@@ -276,12 +276,14 @@ export default function MyAccount() {
             .from(ORDERS_TABLE)
             .select("*")
             .eq("user_id", currentUser.id)
+            .eq("is_deleted", false)
             .order("created_at", { ascending: false }),
           supabase
             .from(ORDERS_TABLE)
             .select("id", { count: "exact", head: true })
-            .eq("user_id", currentUser.id),
-          supabase.from(CART_TABLE).select("quantity").eq("user_id", currentUser.id),
+            .eq("user_id", currentUser.id)
+            .eq("is_deleted", false),
+          supabase.from(CART_TABLE).select("quantity").eq("user_id", currentUser.id).eq("is_deleted", false),
         ]);
 
         if (!addressError && Array.isArray(addressRows)) {

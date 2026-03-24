@@ -107,12 +107,8 @@
 }
 
 @media (max-width: 700px) {
-  .site-footer-panel {
-    margin: 0;
-  }
-
-  .site-footer-nav {
-    gap: 18px;
+  .site-footer {
+    display: none;
   }
 }
 

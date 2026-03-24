@@ -2303,9 +2303,9 @@ const AdminDashboard = () => {
 
     let error = null;
     if (order.dbId) {
-      ({ error } = await supabase.from(STORE_ORDERS_TABLE).delete().eq("id", order.dbId));
+      ({ error } = await supabase.from(STORE_ORDERS_TABLE).update({ is_deleted: true }).eq("id", order.dbId));
     } else {
-      ({ error } = await supabase.from(STORE_ORDERS_TABLE).delete().eq("order_code", order.id));
+      ({ error } = await supabase.from(STORE_ORDERS_TABLE).update({ is_deleted: true }).eq("order_code", order.id));
     }
 
     if (error) {
@@ -2644,7 +2644,7 @@ const AdminDashboard = () => {
       if (rpcDeleteError) {
         const { error: tableDeleteError } = await supabase
           .from(STORE_PRODUCTS_TABLE)
-          .delete()
+          .update({ is_deleted: true })
           .eq("id", pendingDelete.id);
 
         if (tableDeleteError) {
@@ -2669,7 +2669,7 @@ const AdminDashboard = () => {
       if (rpcDeleteError) {
         const { error: tableDeleteError } = await supabase
           .from(STORE_DISCOUNTS_TABLE)
-          .delete()
+          .update({ is_deleted: true })
           .eq("id", pendingDelete.id);
 
         if (tableDeleteError) {
@@ -3625,6 +3625,7 @@ const AdminDashboard = () => {
                   <table className="admin-db-archive-table admin-db-card-table">
                     <thead>
                       <tr>
+                        <th>Image</th>
                         <th>Section</th>
                         <th>Record ID</th>
                         <th>Name</th>
@@ -3635,6 +3636,23 @@ const AdminDashboard = () => {
                     <tbody>
                       {archive.deletedActions.map((item) => (
                         <tr key={item.id}>
+                          <td data-label="Image">
+                            {item.recordData?.image ? (
+                              <img
+                                src={item.recordData.image}
+                                alt={item.recordName || ""}
+                                style={{
+                                  width: 48,
+                                  height: 48,
+                                  objectFit: "cover",
+                                  borderRadius: 8,
+                                  border: "1px solid rgba(255,255,255,0.12)",
+                                }}
+                              />
+                            ) : (
+                              <span style={{ color: "var(--text-dim)", fontSize: "12px" }}>—</span>
+                            )}
+                          </td>
                           <td data-label="Section">{item.section}</td>
                           <td data-label="Record ID">{item.recordId}</td>
                           <td data-label="Name">{item.recordName || "-"}</td>

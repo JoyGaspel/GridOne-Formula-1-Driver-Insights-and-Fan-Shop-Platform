@@ -84,6 +84,7 @@ export async function loadArchiveFromDb() {
     supabase
       .from(ARCHIVE_EVENTS_TABLE)
       .select("*")
+      .eq("is_deleted", false)
       .order("created_at", { ascending: false })
       .limit(MAX_ITEMS),
     supabase
@@ -150,7 +151,10 @@ export async function addRegisteredUser(entry) {
 }
 
 export async function deleteArchiveActionById(archiveId) {
-  const { error } = await supabase.from(ARCHIVE_EVENTS_TABLE).delete().eq("id", archiveId);
+  const { error } = await supabase
+    .from(ARCHIVE_EVENTS_TABLE)
+    .update({ is_deleted: true })
+    .eq("id", archiveId);
   if (error) {
     const current = readArchive();
     return persistArchive({
