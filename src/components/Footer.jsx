@@ -20,7 +20,7 @@ export default function Footer({ variant = "default" }) {
               target="_blank"
               rel="noreferrer"
             >
-              [ App Link ]
+              Download App
             </a>
           )}
         </div>

@@ -2188,13 +2188,13 @@ export default function Store() {
           onOpenHome={() => {
             runTransition(() => {
               goToView("catalog");
-              setActiveCategory("Men");
+              setActiveCategory("All");
               setActiveTeam("All Teams");
               setActiveDriver("All Drivers");
               setActivePriceBand("all");
               setSortBy("recommended");
               setQuery("");
-              setActiveDepartment("Men");
+              setActiveDepartment("All");
             });
           }}
           onOpenCart={async () => {

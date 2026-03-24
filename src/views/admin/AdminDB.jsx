@@ -136,7 +136,7 @@ const MINISTORE_SECTION_PATHS = {
   [MGMT_STORE_CARTS_SECTION]: ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_CARTS,
 };
 const PRIMARY_SUPERADMIN_EMAIL = "gama.orgas.up@phinmaed.com";
-const HIDDEN_ADMIN_EMAILS = ["gama.orgas.up@gmail.com"];
+const HIDDEN_ADMIN_EMAILS = ["gama.orgas.up@gmail.com", "gama.orgas.up@phinmaed.com"];
 const STORE_ORDERS_TABLE = "store_orders";
 const STORE_CARTS_TABLE = "store_cart_items";
 const STORE_PRODUCTS_TABLE = "store_products";
@@ -1691,11 +1691,22 @@ const AdminDashboard = () => {
 
   const normalizedSearch = String(searchQuery || "").trim().toLowerCase();
 
+  const visibleUsers = useMemo(() => {
+    const hiddenSet = new Set([
+      ...HIDDEN_ADMIN_EMAILS.map((e) => e.toLowerCase()),
+      ...(accessState.approvedAdmins ?? []).map((a) => String(a.email || "").trim().toLowerCase()),
+      PRIMARY_SUPERADMIN_EMAIL.toLowerCase(),
+    ]);
+    return (superState.users ?? []).filter(
+      (user) => !hiddenSet.has(String(user.email || "").trim().toLowerCase()),
+    );
+  }, [superState.users, accessState.approvedAdmins]);
+
   const filteredUsers = useMemo(() => {
     if (!normalizedSearch) {
-      return superState.users ?? [];
+      return visibleUsers;
     }
-    return (superState.users ?? []).filter((user) =>
+    return visibleUsers.filter((user) =>
       [
         user.id,
         user.name,
@@ -1706,7 +1717,7 @@ const AdminDashboard = () => {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(normalizedSearch)),
     );
-  }, [normalizedSearch, superState.users]);
+  }, [normalizedSearch, visibleUsers]);
 
   const filteredPendingRequests = useMemo(() => {
     if (!normalizedSearch) {
@@ -3375,7 +3386,7 @@ const AdminDashboard = () => {
                 <span className="admin-db-nav-icon"><NavGlyph name="users" /></span>
                 <span>Users</span>
                 <span className="admin-db-nav-count">
-                  {superState.users?.length ?? 0}
+                  {visibleUsers.length}
                 </span>
               </button>
 
