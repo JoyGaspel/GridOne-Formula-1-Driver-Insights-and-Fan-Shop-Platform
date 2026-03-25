@@ -31,6 +31,9 @@ export default function AppRoutes() {
     if (typeof window === "undefined") {
       return;
     }
+    if (location.pathname.startsWith(ROUTE_PATHS.ADMIN_DASHBOARD)) {
+      return;
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
@@ -67,13 +70,18 @@ export default function AppRoutes() {
     return null;
   }
 
-  const hideFooter = location.pathname.startsWith(ROUTE_PATHS.ADMIN_DASHBOARD);
+  const isAdminDashboard = location.pathname.startsWith(ROUTE_PATHS.ADMIN_DASHBOARD);
+  const hideFooter = isAdminDashboard;
   const isMiniStore = location.pathname.startsWith(ROUTE_PATHS.STORE);
+
+  const fadeKey = isAdminDashboard
+    ? "admin-dashboard"
+    : location.key || location.pathname;
 
   return (
     <div className="app-shell">
       <div className="app-shell-main">
-        <div className="app-route-fade" key={location.key || location.pathname}>
+        <div className="app-route-fade" key={fadeKey}>
           <Suspense fallback={<LoadingScreen message="Loading page..." />}>
           <Routes location={location}>
             <Route
@@ -83,14 +91,7 @@ export default function AppRoutes() {
 
             <Route path={ROUTE_PATHS.LANDING} element={<LandingPage />} />
 
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD} element={<AdminDashboard />} />
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE} element={<AdminDashboard />} />
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_USERS} element={<AdminDashboard />} />
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_PRODUCTS} element={<AdminDashboard />} />
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_DISCOUNTS} element={<AdminDashboard />} />
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_BILLINGS} element={<AdminDashboard />} />
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_ORDERS} element={<AdminDashboard />} />
-            <Route path={ROUTE_PATHS.ADMIN_DASHBOARD_MINISTORE_CARTS} element={<AdminDashboard />} />
+            <Route path={`${ROUTE_PATHS.ADMIN_DASHBOARD}/*`} element={<AdminDashboard />} />
 
             <Route path={ROUTE_PATHS.ADMIN_LOGIN} element={<AdminLogin />} />
             <Route path={ROUTE_PATHS.LOGIN} element={<Login />} />

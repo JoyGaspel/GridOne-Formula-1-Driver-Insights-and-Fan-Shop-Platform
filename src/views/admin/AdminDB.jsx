@@ -1716,6 +1716,14 @@ const AdminDashboard = () => {
 
   const normalizedSearch = String(searchQuery || "").trim().toLowerCase();
 
+  const archivedUserIds = useMemo(() => {
+    return new Set(
+      (archive.deletedActions ?? [])
+        .filter((item) => item.section === USERS_SECTION_KEY && item.recordId)
+        .map((item) => item.recordId),
+    );
+  }, [archive.deletedActions]);
+
   const visibleUsers = useMemo(() => {
     const hiddenSet = new Set([
       ...HIDDEN_ADMIN_EMAILS.map((e) => e.toLowerCase()),
@@ -1723,9 +1731,11 @@ const AdminDashboard = () => {
       PRIMARY_SUPERADMIN_EMAIL.toLowerCase(),
     ]);
     return (superState.users ?? []).filter(
-      (user) => !hiddenSet.has(String(user.email || "").trim().toLowerCase()),
+      (user) =>
+        !hiddenSet.has(String(user.email || "").trim().toLowerCase()) &&
+        !archivedUserIds.has(user.id),
     );
-  }, [superState.users, accessState.approvedAdmins]);
+  }, [superState.users, accessState.approvedAdmins, archivedUserIds]);
 
   const filteredUsers = useMemo(() => {
     if (!normalizedSearch) {
@@ -1867,11 +1877,6 @@ const AdminDashboard = () => {
       if (normalizeAdminPath(location.pathname) !== normalizeAdminPath(path)) {
         navigate(path, { replace: true });
       }
-      return;
-    }
-
-    if (normalizeAdminPath(location.pathname) !== normalizeAdminPath(ROUTE_PATHS.ADMIN_DASHBOARD)) {
-      navigate(ROUTE_PATHS.ADMIN_DASHBOARD, { replace: true });
     }
   };
   const regularAdmins = useMemo(() => {
@@ -2117,21 +2122,24 @@ const AdminDashboard = () => {
     });
     setArchive(nextArchive);
 
-    const { error: rpcError } = await supabase.rpc(ADMIN_DELETE_AUTH_USER_RPC, {
-      target_user_id: id,
-    });
+    if (target.status === "active") {
+      const { error: suspendError } = await supabase.rpc(ADMIN_SUSPEND_AUTH_USER_RPC, {
+        target_user_id: id,
+        should_suspend: true,
+      });
 
-    if (rpcError) {
-      setError(
-        `User archived but could not be deleted from auth (${rpcError.message || "Unknown error"}).`,
-      );
-      return;
+      if (suspendError) {
+        setError(`User archived but could not be suspended (${suspendError.message || "Unknown error"}).`);
+        return;
+      }
+
+      setSuperState((prev) => ({
+        ...prev,
+        users: prev.users.map((user) =>
+          user.id === id ? { ...user, status: "suspended" } : user,
+        ),
+      }));
     }
-
-    setSuperState((prev) => ({
-      ...prev,
-      users: prev.users.filter((user) => user.id !== id),
-    }));
   };
 
   const revokeAdminAccess = (id) => {

@@ -478,7 +478,10 @@ export default function Store() {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedQty, setSelectedQty] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [products, setProducts] = useState(STORE_PRODUCTS);
+  const [products, setProducts] = useState(() => {
+    const cached = readCachedList(STORE_PRODUCTS_CACHE_KEY);
+    return cached.length > 0 ? cached : STORE_PRODUCTS;
+  });
   const [discounts, setDiscounts] = useState([]);
   const [isPending, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
@@ -594,7 +597,6 @@ export default function Store() {
       .order("created_at", { ascending: false });
 
     if (error || !Array.isArray(data)) {
-      setProducts((prev) => (prev.length > 0 ? prev : STORE_PRODUCTS));
       return;
     }
 
@@ -658,11 +660,7 @@ export default function Store() {
   };
 
   useEffect(() => {
-    const cachedProducts = readCachedList(STORE_PRODUCTS_CACHE_KEY);
     const cachedDiscounts = readCachedList(STORE_DISCOUNTS_CACHE_KEY);
-    if (cachedProducts.length > 0) {
-      setProducts(cachedProducts);
-    }
     if (cachedDiscounts.length > 0) {
       setDiscounts(cachedDiscounts);
     }
@@ -2274,10 +2272,8 @@ export default function Store() {
           cartCount={cartCount}
           searchValue={query}
           onSearchChange={(value) => {
-            runTransition(() => {
-              setQuery(value);
-              goToView("catalog");
-            });
+            setQuery(value);
+            runTransition(() => goToView("catalog"));
           }}
         />
 
@@ -2414,13 +2410,6 @@ export default function Store() {
                         <option value="new-in">New In</option>
                       </select>
                     </div>
-                    <button
-                      type="button"
-                      className="catalog-filter-toggle"
-                      onClick={() => runTransition(() => setSidebarOpen(true))}
-                    >
-                      Filters
-                    </button>
                     <p className="store-results">{filteredProducts.length} items</p>
                   </div>
 
