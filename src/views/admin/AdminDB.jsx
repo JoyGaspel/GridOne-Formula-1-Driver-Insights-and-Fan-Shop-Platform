@@ -1007,7 +1007,10 @@ const AdminDashboard = () => {
     }
 
     if (!cartsRpc.error && Array.isArray(cartsRpc.data)) {
-      const normalizedCarts = cartsRpc.data.map(normalizeStoreCartItem).filter(Boolean);
+      const normalizedCarts = cartsRpc.data
+        .filter((row) => !row.is_deleted)
+        .map(normalizeStoreCartItem)
+        .filter(Boolean);
       setStoreCarts(normalizedCarts);
       writeCachedList(STORE_CARTS_CACHE_KEY, normalizedCarts);
     } else {
@@ -1019,6 +1022,7 @@ const AdminDashboard = () => {
       const { data, error } = await supabase
         .from(STORE_CARTS_TABLE)
         .select("*")
+        .eq("is_deleted", false)
         .order("created_at", { ascending: false });
 
       if (!error && Array.isArray(data)) {
@@ -2777,35 +2781,27 @@ const AdminDashboard = () => {
       }
 
       if (section === STORE_ORDERS_TABLE) {
-        const payload = {
-          order_code: recordData.order_code || recordData.id || "",
-          user_id: recordData.user_id || null,
-          items: Array.isArray(recordData.items) ? recordData.items : [],
-          item_count: Number(recordData.item_count || 0),
-          total: Number(recordData.total || 0),
-          summary: recordData.summary || {},
-          recipient_full_name: recordData.recipient_full_name || "",
-          recipient_mobile: recordData.recipient_mobile || "",
-          recipient_address: recordData.recipient_address || "",
-          payment_method: recordData.payment_method || "GCash",
-          payment_status: recordData.payment_status || "Pending",
-          order_status: recordData.order_status || "Pending",
-          delivery_status: recordData.delivery_status || "Warehouse",
-          notes: recordData.notes || "",
-          otp_tx_id: recordData.otp_tx_id || null,
-          otp_verified_at: recordData.otp_verified_at || null,
-          otp_channel: recordData.otp_channel || null,
-          otp_email: recordData.otp_email || null,
-          is_deleted: false,
-        };
+        let restoreError = null;
 
         if (recordData.dbId) {
-          payload.id = recordData.dbId;
+          // Update existing soft-deleted row back to active
+          const { error } = await supabase
+            .from(STORE_ORDERS_TABLE)
+            .update({ is_deleted: false })
+            .eq("id", recordData.dbId);
+          restoreError = error;
+        } else if (recordData.order_code) {
+          const { error } = await supabase
+            .from(STORE_ORDERS_TABLE)
+            .update({ is_deleted: false })
+            .eq("order_code", recordData.order_code)
+            .eq("is_deleted", true)
+            .limit(1);
+          restoreError = error;
+        } else {
+          setError("Unable to restore order. Missing order ID.");
+          return;
         }
-
-        const { error: restoreError } = await supabase
-          .from(STORE_ORDERS_TABLE)
-          .upsert(payload, { onConflict: recordData.dbId ? "id" : "order_code" });
 
         if (restoreError) {
           setError(restoreError.message || "Unable to restore store order.");
