@@ -495,6 +495,14 @@ export default function Store() {
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [notice, setNotice] = useState("");
+  const noticeTimerRef = useRef(null);
+  useEffect(() => {
+    if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+    if (notice) {
+      noticeTimerRef.current = setTimeout(() => setNotice(""), 2000);
+    }
+    return () => { if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current); };
+  }, [notice]);
   const [userId, setUserId] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [selectedCartKeys, setSelectedCartKeys] = useState([]);
@@ -954,12 +962,14 @@ export default function Store() {
     const syncVersion = cartSyncVersionRef.current + 1;
     cartSyncVersionRef.current = syncVersion;
 
+    // Set syncing flag immediately so realtime events are ignored during the whole sync window
+    cartSyncingRef.current = true;
+
     cartSyncTimerRef.current = setTimeout(async () => {
       if (cartSyncVersionRef.current !== syncVersion) {
+        cartSyncingRef.current = false;
         return;
       }
-
-      cartSyncingRef.current = true;
 
       try {
         const { error: markError } = await supabase
@@ -996,9 +1006,10 @@ export default function Store() {
 
         await supabase.from(CART_TABLE).insert(payload);
       } finally {
+        // Keep syncing flag up long enough for realtime events from insert to arrive and be ignored
         setTimeout(() => {
           cartSyncingRef.current = false;
-        }, 500);
+        }, 1500);
       }
     }, 400);
 
@@ -2214,7 +2225,32 @@ export default function Store() {
         otp_email: paymentEmail || null,
         verified_at: otpVerifiedAt || null,
       });
+
+      // Decrement stock for each purchased item
+      for (const item of selectedCartItems) {
+        const { data: current } = await supabase
+          .from(PRODUCTS_TABLE)
+          .select("stock")
+          .eq("id", item.id)
+          .single();
+        if (current) {
+          const newStock = Math.max(0, (current.stock || 0) - (item.quantity || 1));
+          await supabase
+            .from(PRODUCTS_TABLE)
+            .update({ stock: newStock })
+            .eq("id", item.id);
+        }
+      }
     }
+
+    // Update local product stock
+    setProducts((prev) =>
+      prev.map((p) => {
+        const bought = selectedCartItems.find((ci) => ci.id === p.id);
+        if (bought) return { ...p, stock: Math.max(0, p.stock - (bought.quantity || 1)) };
+        return p;
+      })
+    );
 
     setOrders((prev) => [newOrder, ...prev]);
     setCart((prev) =>
@@ -2286,7 +2322,7 @@ export default function Store() {
                   className={`store-sidebar-backdrop ${sidebarOpen ? "open" : ""}`}
                   onClick={() => setSidebarOpen(false)}
                 />
-                <aside className={`store-sidebar ${sidebarOpen ? "open" : ""}`}>
+                <aside className={`store-sidebar ${sidebarOpen ? "open" : ""}${detailOpen ? " sidebar-hidden" : ""}`}>
                   <div className="store-sidebar-head">
                     <h3>{activeDepartment === "Shop By Driver" ? "Drivers" : "Teams"}</h3>
                     <button
@@ -2394,7 +2430,7 @@ export default function Store() {
                 </aside>
 
                 <div className="store-catalog-content">
-                  <div className="catalog-head">
+                  <div className={`catalog-head${detailOpen ? " catalog-head-hidden" : ""}`}>
                     <div className="catalog-sort">
                       <label htmlFor="store-sort">Sort by</label>
                     <select
