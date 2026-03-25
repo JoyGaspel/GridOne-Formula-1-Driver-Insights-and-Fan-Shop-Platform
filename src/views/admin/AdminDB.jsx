@@ -989,7 +989,10 @@ const AdminDashboard = () => {
     const errors = [];
 
     if (!ordersRpc.error && Array.isArray(ordersRpc.data)) {
-      normalizedOrders = ordersRpc.data.map(normalizeStoreOrder).filter(Boolean);
+      normalizedOrders = ordersRpc.data
+        .filter((row) => !row.is_deleted)
+        .map(normalizeStoreOrder)
+        .filter(Boolean);
     } else {
       if (ordersRpc.error) {
         errors.push(
@@ -999,6 +1002,7 @@ const AdminDashboard = () => {
       const { data, error } = await supabase
         .from(STORE_ORDERS_TABLE)
         .select("*")
+        .eq("is_deleted", false)
         .order("created_at", { ascending: false });
 
       if (!error && Array.isArray(data)) {
