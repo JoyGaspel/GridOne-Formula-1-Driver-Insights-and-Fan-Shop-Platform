@@ -2778,8 +2778,8 @@ const AdminDashboard = () => {
 
       if (section === STORE_ORDERS_TABLE) {
         const payload = {
-          user_id: recordData.user_id || null,
           order_code: recordData.order_code || recordData.id || "",
+          user_id: recordData.user_id || null,
           items: Array.isArray(recordData.items) ? recordData.items : [],
           item_count: Number(recordData.item_count || 0),
           total: Number(recordData.total || 0),
@@ -2796,16 +2796,22 @@ const AdminDashboard = () => {
           otp_verified_at: recordData.otp_verified_at || null,
           otp_channel: recordData.otp_channel || null,
           otp_email: recordData.otp_email || null,
-          created_at: recordData.created_at || null,
-          updated_at: recordData.updated_at || null,
+          is_deleted: false,
         };
 
-        const { error: restoreError } = await supabase.from(STORE_ORDERS_TABLE).insert(payload);
+        if (recordData.dbId) {
+          payload.id = recordData.dbId;
+        }
+
+        const { error: restoreError } = await supabase
+          .from(STORE_ORDERS_TABLE)
+          .upsert(payload, { onConflict: recordData.dbId ? "id" : "order_code" });
+
         if (restoreError) {
           setError(restoreError.message || "Unable to restore store order.");
           return;
         }
-        void loadStoreData();
+        await loadStoreData();
         const nextArchive = await deleteArchiveActionById(item.id);
         setArchive(nextArchive);
         return;
